@@ -1,12 +1,16 @@
 from flask import Flask, request, jsonify
-from models import User, session
+
+from models import User
+from models import session
 
 app = Flask(__name__)
 
+
 @app.route('/api/v1.0/login', methods=['POST'])
 def login():
-    username = request.json.get['username']
-    password = request.json.get['password']
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
 
     user = session.query(User).filter_by(username=username, password=password).first()
     if user:

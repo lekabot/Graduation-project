@@ -6,6 +6,7 @@ engine = create_engine("postgresql://localhost/Graduation-project")
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -13,11 +14,13 @@ class User(Base):
     username = Column(String(250))
     password = Column(String(250))
 
+
 class LogAction(Base):
     __tablename__ = 'log_actions'
 
     id = Column(Integer, primary_key=True)
     title = Column(String(250))
+
 
 class AgreementType(Base):
     __tablename__ = 'agreement_types'
@@ -25,11 +28,13 @@ class AgreementType(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(250))
 
+
 class Country(Base):
     __tablename__ = 'countries'
 
     id = Column(Integer, primary_key=True)
     title = Column(String(250))
+
 
 class Manufacturer(Base):
     __tablename__ = 'manufacturers'
@@ -40,6 +45,7 @@ class Manufacturer(Base):
     country_id = Column(Integer, ForeignKey('countries.id'))
     country = relationship("Country")
 
+
 class EquipmentDocument(Base):
     __tablename__ = 'equipment_documents'
 
@@ -47,6 +53,7 @@ class EquipmentDocument(Base):
     agreement_type = Column(Integer, ForeignKey('agreement_types.id'))
     contract_number = Column(Integer)
     begin_date = Column(Date)
+
 
 class Equipment(Base):
     __tablename__ = 'equipments'
@@ -61,6 +68,7 @@ class Equipment(Base):
     property_rights_info_id = Column(Integer, ForeignKey('equipment_documents.id'))
     installation_location = Column(String(250))
 
+
 class Attestation(Base):
     __tablename__ = 'attestations'
 
@@ -68,6 +76,7 @@ class Attestation(Base):
     equipment = Column(Integer, ForeignKey('equipments.id'))
     validity_period = Column(Date)
     event_duration = Column(Date)
+
 
 class Check(Base):
     __tablename__ = 'checks'
@@ -77,6 +86,7 @@ class Check(Base):
     last_check = Column(Date)
     validity_period = Column(Date)
     planned_inspection = Column(Date)
+
 
 class UserLog(Base):
     __tablename__ = 'user_log'
@@ -94,6 +104,3 @@ class UserLog(Base):
 
 Session = sessionmaker(bind=engine)
 session = Session()
-
-# for equipment in session.query(Equipment).all():
-#     print(equipment.id, equipment.title)
