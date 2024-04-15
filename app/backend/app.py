@@ -14,6 +14,6 @@ def login():
 
     user = session.query(User).filter_by(username=username, password=password).first()
     if user:
-        return jsonify({'status': 'success'}), 200
+        return jsonify({'status': 'success', 'message': 'success'}), 200
     else:
         return jsonify({'status': 'error', 'message': 'Invalid username or password'}), 401
