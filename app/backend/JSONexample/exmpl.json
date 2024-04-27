@@ -1,0 +1,202 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "user1",
+      "password": "1"
+    },
+    {
+      "id": 2,
+      "username": "user2",
+      "password": "2"
+    },
+    {
+      "id": 3,
+      "username": "user3",
+      "password": "3"
+    }
+  ],
+  "log_actions": [
+    {
+      "id": 1,
+      "title": "Action 1"
+    },
+    {
+      "id": 2,
+      "title": "Action 2"
+    },
+    {
+      "id": 3,
+      "title": "Action 3"
+    }
+  ],
+  "agreement_types": [
+    {
+      "id": 1,
+      "title": "Type 1"
+    },
+    {
+      "id": 2,
+      "title": "Type 2"
+    },
+    {
+      "id": 3,
+      "title": "Type 3"
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "Country 1"
+    },
+    {
+      "id": 2,
+      "title": "Country 2"
+    },
+    {
+      "id": 3,
+      "title": "Country 3"
+    }
+  ],
+  "manufacturers": [
+    {
+      "id": 1,
+      "title": "Manufacturer 1",
+      "business_form": "Form 1",
+      "country_id": 1
+    },
+    {
+      "id": 2,
+      "title": "Manufacturer 2",
+      "business_form": "Form 2",
+      "country_id": 2
+    },
+    {
+      "id": 3,
+      "title": "Manufacturer 3",
+      "business_form": "Form 3",
+      "country_id": 3
+    }
+  ],
+  "equipment_documents": [
+    {
+      "id": 1,
+      "agreement_type": 1,
+      "contract_number": 1001,
+      "begin_date": "2023-01-01"
+    },
+    {
+      "id": 2,
+      "agreement_type": 2,
+      "contract_number": 1002,
+      "begin_date": "2023-02-01"
+    },
+    {
+      "id": 3,
+      "agreement_type": 3,
+      "contract_number": 1003,
+      "begin_date": "2023-03-01"
+    }
+  ],
+  "equipments": [
+    {
+      "id": 1,
+      "measured_parameters": "Parameter 1",
+      "title": "Equipment 1",
+      "manufacturer_id": 1,
+      "year_of_commissioning": "2023-01-01",
+      "measurement_range": "Range 1",
+      "accuracy_class": "Class 1",
+      "property_rights_info_id": 1,
+      "installation_location": "Location 1"
+    },
+    {
+      "id": 2,
+      "measured_parameters": "Parameter 2",
+      "title": "Equipment 2",
+      "manufacturer_id": 2,
+      "year_of_commissioning": "2023-02-01",
+      "measurement_range": "Range 2",
+      "accuracy_class": "Class 2",
+      "property_rights_info_id": 2,
+      "installation_location": "Location 2"
+    },
+    {
+      "id": 3,
+      "measured_parameters": "Parameter 3",
+      "title": "Equipment 3",
+      "manufacturer_id": 3,
+      "year_of_commissioning": "2023-03-01",
+      "measurement_range": "Range 3",
+      "accuracy_class": "Class 3",
+      "property_rights_info_id": 3,
+      "installation_location": "Location 3"
+    }
+  ],
+  "attestations": [
+    {
+      "id": 1,
+      "equipment": 1,
+      "validity_period": "2024-01-01",
+      "event_duration": "2024-01-15"
+    },
+    {
+      "id": 2,
+      "equipment": 2,
+      "validity_period": "2024-02-01",
+      "event_duration": "2024-02-15"
+    },
+    {
+      "id": 3,
+      "equipment": 3,
+      "validity_period": "2024-03-01",
+      "event_duration": "2024-03-15"
+    }
+  ],
+  "checks": [
+    {
+      "id": 1,
+      "equipment": 1,
+      "last_check": "2023-12-01",
+      "validity_period": "2024-01-01",
+      "planned_inspection": "2024-01-15"
+    },
+    {
+      "id": 2,
+      "equipment": 2,
+      "last_check": "2024-01-01",
+      "validity_period": "2024-02-01",
+      "planned_inspection": "2024-02-15"
+    },
+    {
+      "id": 3,
+      "equipment": 3,
+      "last_check": "2024-02-01",
+      "validity_period": "2024-03-01",
+      "planned_inspection": "2024-03-15"
+    }
+  ],
+  "user_log": [
+    {
+      "id": 1,
+      "user": 1,
+      "equipment": 1,
+      "action": 1,
+      "log_date": "2024-01-01"
+    },
+    {
+      "id": 2,
+      "user": 2,
+      "equipment": 2,
+      "action": 2,
+      "log_date": "2024-02-01"
+    },
+    {
+      "id": 3,
+      "user": 3,
+      "equipment": 3,
+      "action": 3,
+      "log_date": "2024-03-01"
+    }
+  ]
+}
