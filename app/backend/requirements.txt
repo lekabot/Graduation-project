@@ -21,3 +21,4 @@ build~=0.10.0
 SQLAlchemy~=2.0.29
 six~=1.16.0
 requests
+gunicorn

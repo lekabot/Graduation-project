@@ -17,3 +17,7 @@ def login():
         return jsonify({'status': 'success', 'message': 'success'}), 200
     else:
         return jsonify({'status': 'error', 'message': 'Invalid username or password'}), 401
+
+@app.route('/check')
+def check():
+    return 'Hello, world!'
