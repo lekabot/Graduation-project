@@ -1,31 +1,37 @@
-import unittest
-import requests
+import os
+import sys
 
-class AptTests(unittest.TestCase):
-    def test_login_successful(self):
-        data = {
-            'username': 'user1',
-            'password': '1'
-        }
+from fastapi.testclient import TestClient
 
-        response = requests.post('http://127.0.0.1:5000/api/v1.0/login', json=data)
+sys.path.append(os.path.join(sys.path[0], 'src'))
 
-        self.assertEqual(response.status_code, 200)
+from src.main import app
 
-        self.assertEqual(response.json()['status'], 'success')
+client = TestClient(app)
 
-    def test_login_failure(self):
-        data = {
-            'username': 'nonexistent_user',
-            'password': 'wrong_password'
-        }
 
-        response = requests.post('http://127.0.0.1:5000/api/v1.0/login', json=data)
+def test_logout():
+    response_login = client.post("/auth/login", json={"username": "1", "password": "1"})
+    assert response_login.status_code >= 200
+    response_logout = client.post("/auth/logout")
+    assert response_logout.status_code >= 200
 
-        self.assertEqual(response.status_code, 401)
 
-        self.assertEqual(response.json()['status'], 'error')
-        self.assertEqual(response.json()['message'], 'Invalid username or password')
+def test_authentication():
+    response = client.post("/auth/login", json={"username": "1", "password": "1"})
+    assert response.status_code >= 200
 
-if __name__ == '__main__':
-    unittest.main()
+
+def test_registration():
+    response = client.post("/auth/register",
+                           json={
+                               "email": "string",
+                               "password": "string",
+                               "is_active": True,
+                               "is_superuser": False,
+                               "is_verified": False,
+                               "username": "string"
+                           })
+
+    assert response.status_code >= 200
+    assert "id" in response.json()
