@@ -1,5 +1,4 @@
-import com.android.volley.*
-import com.example.front.ApiHelper
+import com.example.front.data.ApiHelper
 import io.mockk.*
 import okhttp3.OkHttpClient
 import org.junit.Assert.assertTrue
@@ -13,11 +12,12 @@ class ApiHelperTest {
         val response = mockk<Response>()
         every { client.newCall(any()).execute() } returns response
         every { response.isSuccessful } returns true
-        every { response.body?.string() } returns "{\"message\":\"success\",\"status\":\"success\"}"
+        every { response.code } returns 204
 
-        val result = ApiHelper.login("user1", "1")
+        val result = ApiHelper.login(username = "1", password = "1")
         assertTrue(result)
     }
+
 
     @Test
     fun `login failure`() {
