@@ -1,11 +1,11 @@
-import com.example.front.data.ApiHelper
+import com.example.front.data.AuthAPI
 import io.mockk.*
 import okhttp3.OkHttpClient
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.Assert.*
 import okhttp3.Response
-class ApiHelperTest {
+class AuthAPITest {
     @Test
     fun `login success`() {
         val client = mockk<OkHttpClient>()
@@ -14,7 +14,7 @@ class ApiHelperTest {
         every { response.isSuccessful } returns true
         every { response.code } returns 204
 
-        val result = ApiHelper.login(username = "1", password = "1")
+        val result = AuthAPI.login(username = "1", password = "1")
         assertTrue(result)
     }
 
@@ -26,7 +26,7 @@ class ApiHelperTest {
         every { client.newCall(any()).execute() } returns response
         every { response.isSuccessful } returns false
 
-        val result = ApiHelper.login("username", "password")
+        val result = AuthAPI.login("username", "password")
         assertFalse(result)
     }
 }
