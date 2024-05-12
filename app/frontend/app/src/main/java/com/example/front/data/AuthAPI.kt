@@ -52,7 +52,8 @@ object AuthAPI {
         json.put("is_superuser", false)
         json.put("is_verified", false)
 
-        val requestBody = json.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
+        val requestBody = json.toString().toRequestBody(
+            "application/json; charset=utf-8".toMediaType())
 
         val request = Request.Builder()
             .url(url)
