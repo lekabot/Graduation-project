@@ -24,9 +24,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.front.data.ApiHelper
 import com.example.front.ui.theme.FrontTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
@@ -78,19 +84,23 @@ class MainActivity : ComponentActivity() {
 
             Button(
                 onClick = {
-                    val loggedIn = ApiHelper.login(username, password)
-                    errorMessage = if (loggedIn) {
-                        "You are the best"
-                    } else {
-                        "Wrong login or password"
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val loggedIn = ApiHelper.login(username, password)
+                        withContext(Dispatchers.Main) {
+                            errorMessage = if (loggedIn) {
+                                "You are the best"
+                            } else {
+                                "Wrong login or password"
+                            }
+                        }
                     }
                 },
-//            modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Войти")
             }
             Spacer(modifier = Modifier.height(16.dp))
             ErrorMessage(errorMessage)
+
         }
     }
 
@@ -103,7 +113,8 @@ class MainActivity : ComponentActivity() {
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.Red
+                color = Color.Red,
+                textAlign = TextAlign.Center
             )
         }
     }
