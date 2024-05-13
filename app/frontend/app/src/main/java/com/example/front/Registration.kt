@@ -34,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.example.front.ui.theme.Errors.ErrorMessage
+import com.example.front.ui.theme.UIObject.Link
 
 class Registration : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,12 +115,16 @@ fun RegistrationScreen() {
                     errorMessage = "Пароли должны быть одинаковыми"
                 } else {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val registered = AuthAPI.register(email, username, password)
+                        val result = AuthAPI.register(email, username, password)
                         withContext(Dispatchers.Main) {
-                            errorMessage = if (registered) {
-                                "Регистрация прошла успешно"
-                            } else {
-                                "Ошибка регистрации"
+                            errorMessage = when (result) {
+                                is AuthAPI.RegistrationResult.Success -> {
+                                    "Регистрация прошла успешно"
+                                }
+
+                                is AuthAPI.RegistrationResult.Error -> {
+                                    result.message
+                                }
                             }
                         }
                     }
@@ -130,6 +135,9 @@ fun RegistrationScreen() {
         }
         Spacer(modifier = Modifier.height(16.dp))
         ErrorMessage(errorMessage)
+        Spacer(modifier = Modifier.height(16.dp))
+        Link(text = "Уже есть аккаунт?", dest = MainActivity::class.java)
+
     }
 }
 

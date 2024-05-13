@@ -3,7 +3,7 @@ services:
     image: postgres:latest
     container_name: db_app
     env_file:
-      - .env
+      - .env_dev
     ports:
       - 5432:5432
 
@@ -11,7 +11,7 @@ services:
     build:
       context: .
     env_file:
-      - .env
+      - .env_dev
     container_name: api_app
     depends_on:
       - db

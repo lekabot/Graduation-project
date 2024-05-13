@@ -1,15 +1,16 @@
 import contextlib
-from typing import Optional, Union
+from typing import Optional
 
 from fastapi import Depends, Request
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from fastapi_users import (BaseUserManager, IntegerIDMixin, exceptions, models,
                            schemas)
-from sqlalchemy import func, select, Select
+from sqlalchemy import select, delete, Select
 from auth.models import UserORM
 from auth.utils import get_user_db
 from config import SECRET_AUTH
 from database import get_async_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from .schemas import UserRead
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):
@@ -21,11 +22,38 @@ get_user_db_context = contextlib.asynccontextmanager(get_user_db)
 get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
 
 
-async def get_by_username(username) -> Optional[UserORM]:
+async def delete_by_username(username: str) -> int:
     async with get_async_session_context() as session:
-        request = select(UserORM).where(UserORM.username == username)
-        res = await session.execute(request)
-        return res.unique().scalar_one_or_none()
+        request = (
+            delete(UserORM)
+            .where(UserORM.username == username)
+        )
+        result = await session.execute(request)
+        if result.rowcount == 0:
+            return 1
+        await session.commit()
+        return 0
+
+
+async def get_by_id(user_id: int) -> Optional[UserRead]:
+    async with get_async_session_context() as session:
+        statement = select(UserORM).where(UserORM.id == user_id)
+        user_orm = await _get_user(statement, session)
+        if user_orm is not None:
+            return UserRead.from_orm(user_orm)
+
+
+async def get_by_username(username) -> Optional[UserRead]:
+    async with get_async_session_context() as session:
+        statement = select(UserORM).where(UserORM.username == username)
+        user_orm = await _get_user(statement, session)
+        if user_orm is not None:
+            return UserRead.from_orm(user_orm)
+
+
+async def _get_user(statement: Select, session: AsyncSession):
+    results = await session.execute(statement)
+    return results.unique().scalar_one_or_none()
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[UserORM, int]):

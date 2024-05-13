@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.example.front.data.AuthAPI
 import com.example.front.ui.theme.Errors.ErrorMessage
 import com.example.front.ui.theme.FrontTheme
+import com.example.front.ui.theme.UIObject.Link
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -103,17 +104,8 @@ class MainActivity : ComponentActivity() {
             }
             Spacer(modifier = Modifier.height(16.dp))
             ErrorMessage(errorMessage)
-
-            val context = LocalContext.current
-
-            Text(
-                modifier = Modifier.clickable {
-                    val intent = Intent(context, Registration::class.java)
-                    context.startActivity(intent)
-                },
-                text = "Ешё нет аккаунта?",
-                color = Color.Blue
-            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Link(text = "Ешё нет аккаунта?", dest = Registration::class.java)
         }
     }
 

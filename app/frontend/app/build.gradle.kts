@@ -52,10 +52,12 @@ android {
 }
 
 dependencies {
+    implementation("org.mockito:mockito-core:4.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     implementation("com.google.code.gson:gson:2.8.8")
     testImplementation("io.mockk:mockk:1.12.0")
+    testImplementation("org.json:json:20140107")
     implementation("androidx.core:core-ktx:1.7.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
