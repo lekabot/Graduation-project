@@ -1,7 +1,4 @@
-import contextlib
-from datetime import datetime
-
-from sqlalchemy import (TIMESTAMP, Boolean, String)
+from sqlalchemy import (String)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from fastapi_users.db import SQLAlchemyBaseUserTable

@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun LoginScreen() {
+        val context = LocalContext.current
         var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var errorMessage by remember { mutableStateOf("") }
@@ -86,15 +87,19 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = {
                     CoroutineScope(Dispatchers.IO).launch {
                         val loggedIn = AuthAPI.login(username, password)
                         withContext(Dispatchers.Main) {
-                            errorMessage = if (loggedIn) {
-                                "You are the best"
+                            if (loggedIn) {
+                                errorMessage = "Вы вошли"
+                                val intent = Intent(context, Finder::class.java)
+                                context.startActivity(intent)
                             } else {
-                                "Wrong login or password"
+                                errorMessage = "Неверный логин или пароль"
                             }
                         }
                     }

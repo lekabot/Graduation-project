@@ -3,5 +3,7 @@
     <string name="app_name">front</string>
     <string name="title_activity_registration">Registration</string>
     <string name="reg_err_1">Такой пользователь уже существует</string>
+    <string name="title_activity_qractivity">QRActivity</string>
+    <string name="title_activity_finder">Finder</string>
 
 </resources>
