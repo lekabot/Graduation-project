@@ -10,6 +10,8 @@ class ThingORM(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(length=320), index=True, nullable=False)
 
+    thing_parameter = relationship("ThingParameterORM", back_populates="thing")
+
 
 class ParameterORM(Base):
     __tablename__ = "parameter"
@@ -17,6 +19,8 @@ class ParameterORM(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     key: Mapped[str] = mapped_column(String(length=320), index=True, nullable=False)
     value: Mapped[str] = mapped_column(String(length=320), index=True, nullable=False)
+
+    thing_parameter = relationship("ThingParameterORM", back_populates="parameter")
 
 
 class ThingParameterORM(Base):

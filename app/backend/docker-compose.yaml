@@ -6,6 +6,18 @@ services:
       - .env_dev
     ports:
       - 5432:5432
+    volumes:
+      - ./tests/data.sql:/docker-entrypoint-initdb.d/data.sql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    env_file:
+      - .env_dev
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
 
   app:
     build:
