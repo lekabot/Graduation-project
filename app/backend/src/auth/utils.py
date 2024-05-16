@@ -2,7 +2,7 @@ from fastapi import Depends
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.models import UserORM
+from models import UserORM
 from database import get_async_session
 
 

@@ -27,8 +27,8 @@ class ThingORM(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(length=320), index=True, nullable=False)
 
-    thing_parameters = relationship("ThingParameterORM", back_populates="thing")
-    user_groups = relationship("UserGroupORM", back_populates="thing")
+    thing_parameters = relationship("ThingParameterORM", back_populates="thing", cascade="all, delete")
+    user_groups = relationship("UserGroupORM", back_populates="thing", cascade="all, delete")
 
 
 class ParameterORM(Base):
@@ -38,7 +38,7 @@ class ParameterORM(Base):
     key: Mapped[str] = mapped_column(String(length=320), index=True, nullable=False)
     value: Mapped[str] = mapped_column(String(length=320), index=True, nullable=False)
 
-    thing_parameters = relationship("ThingParameterORM", back_populates="parameter")
+    thing_parameters = relationship("ThingParameterORM", back_populates="parameter", cascade="all, delete")
 
 
 class ThingParameterORM(Base):
@@ -60,9 +60,6 @@ class GroupORM(Base):
     url: Mapped[str] = mapped_column(String(length=320), unique=True)
 
     user_groups = relationship("UserGroupORM", back_populates="group")
-
-
-# from auth.models import UserORM
 
 
 class UserGroupORM(Base):

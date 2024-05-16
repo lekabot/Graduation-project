@@ -1,26 +1,8 @@
 import asyncio
 
-from auth.schemas import UserCreate
-from things.models import ThingORM, ParameterORM, ThingParameterORM
-from auth.manager import get_async_session_context, get_user_manager_context, get_user_db_context
-from fastapi_users.exceptions import UserAlreadyExists
-
-
-async def create_user(email: str, username: str, password: str):
-    try:
-        async with get_async_session_context() as session:
-            async with get_user_db_context(session) as user_db:
-                async with get_user_manager_context(user_db) as user_manager:
-                    user = await user_manager.create(
-                        UserCreate(
-                            email=email, username=username, password=password
-                        )
-                    )
-                    print(f"User created {user}")
-                    return user
-    except UserAlreadyExists:
-        print(f"User {email} already exists")
-        raise
+from models import ThingORM, ParameterORM, ThingParameterORM, GroupORM, UserGroupORM
+from auth.manager import get_async_session_context
+from auth.manager import create_user
 
 
 async def init_db():
@@ -45,9 +27,23 @@ async def init_db():
         session.add_all([tp1, tp2, tp3, tp4, tp5])
         await session.commit()
 
-        await create_user(email="john@example.com", username="johndoe", password="password1")
-        await create_user(email="jane@example.com", username="janedoe", password="password2")
-        await create_user(email="admin@example.com", username="admin", password="password3")
+        group1 = GroupORM(title="group1", url="124124124")
+        group2 = GroupORM(title="group2", url="12412312532432")
+        group3 = GroupORM(title="group3", url="1252516423")
+
+        session.add_all([group1, group2, group3])
+        await session.commit()
+
+        user1 = await create_user(email="345@example.com", username="345", password="1")
+        user2 = await create_user(email="346@example.com", username="346", password="1")
+        user3 = await create_user(email="347@example.com", username="347", password="1")
+
+        ug1 = UserGroupORM(group_id=group1.id, thing_id=thing1.id, user_id=user1.id)
+        ug2 = UserGroupORM(group_id=group2.id, thing_id=thing2.id, user_id=user2.id)
+        ug3 = UserGroupORM(group_id=group3.id, thing_id=thing3.id, user_id=user3.id)
+
+        session.add_all([ug1, ug2, ug3])
+        await session.commit()
 
 
 if __name__ == "__main__":
