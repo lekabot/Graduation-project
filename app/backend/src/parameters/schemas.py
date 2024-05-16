@@ -15,3 +15,8 @@ class ParameterUpdate(BaseModel):
 class ParameterCreate(BaseModel):
     key: str
     value: str
+
+
+class ParameterDelete(BaseModel):
+    thing_title: str
+    key: str

@@ -4,6 +4,7 @@ from auth.routes import router_user
 from auth.schemas import UserRead, UserCreate
 from things.router import router_thing
 from parameters.routes import router_parameter
+from group.routes import router_group
 
 app = FastAPI(
     title="Tvoya mama fantastika",
@@ -25,3 +26,4 @@ app.include_router(
 app.include_router(router_user)
 app.include_router(router_thing)
 app.include_router(router_parameter)
+app.include_router(router_group)

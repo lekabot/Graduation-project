@@ -1,5 +1,5 @@
 from typing import Optional, List
-from .schema import ThingRead, ThingCreate
+from .schemas import ThingRead, ThingCreate
 from sqlalchemy import select, delete
 from fastapi import APIRouter, Depends
 from models import ThingORM

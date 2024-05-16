@@ -5,6 +5,8 @@ from fastapi import Depends, Request
 from fastapi_users import (BaseUserManager, IntegerIDMixin, exceptions, models,
                            schemas)
 from sqlalchemy import select, delete, Select
+
+from group.manager import create_group
 from models import UserORM
 from auth.utils import get_user_db
 from config import SECRET_AUTH
@@ -13,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .schemas import UserRead
 from auth.schemas import UserCreate
 from fastapi_users.exceptions import UserAlreadyExists
+from group.schemas import UserEmptyGroupCreate
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):
@@ -82,7 +85,10 @@ class UserManager(IntegerIDMixin, BaseUserManager[UserORM, int]):
     async def on_after_register(self, user: UserORM,
                                 request: Optional[Request] = None
                                 ) -> None:
-        print(f"User {user.id} has registered.")
+        user_data = UserEmptyGroupCreate(
+            username=user.username,
+            user_id=user.id)
+        await create_group(user_data)
 
     async def create(
             self,

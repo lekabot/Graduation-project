@@ -19,7 +19,7 @@ class UserORM(SQLAlchemyBaseUserTable[int], Base):
     )
 
     user_groups = relationship("UserGroupORM", back_populates="user")
-
+    groups = relationship("GroupORM", back_populates="owner")
 
 class ThingORM(Base):
     __tablename__ = "thing"
@@ -58,8 +58,10 @@ class GroupORM(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(length=320), nullable=False)
     url: Mapped[str] = mapped_column(String(length=320), unique=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("user.id"))
 
     user_groups = relationship("UserGroupORM", back_populates="group")
+    owner = relationship("UserORM", back_populates="groups")
 
 
 class UserGroupORM(Base):

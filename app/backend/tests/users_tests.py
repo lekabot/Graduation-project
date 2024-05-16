@@ -33,10 +33,19 @@ async def test_registration():
                                      "is_verified": False,
                                      "username": "string1"
                                  })
+
+        assert response.status_code == 201
+        response_data = response.json()
+
+        user_id = response_data["id"]
+        group_create_response = await ac.get(f"/group/get_group_by_user_id/{user_id}")
+
         username = "string1"
+
+        await ac.delete(f"/group/delete_by_username/{username}")
         await ac.delete(f"/user/delete_by_username/{username}")
-    assert response.status_code == 201
-    assert "id" in response.json()
+
+        assert group_create_response.status_code == 200
 
 
 async def test_delete_by_username_user_found():
