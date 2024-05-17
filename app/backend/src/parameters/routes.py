@@ -1,9 +1,12 @@
-from typing import Optional, List
-from sqlalchemy import select, delete, update, join, and_
-from fastapi import APIRouter, Depends
-from models import ThingORM, ParameterORM, ThingParameterORM
+from sqlalchemy import select, update, join, and_, delete
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
+from auth.base_config import current_user
+from models import ParameterORM, ThingParameterORM, UserORM
 from database import get_async_session
-from .schemas import ParameterRead, ParameterUpdate, ParameterCreate, ParameterDelete
+from .manager import get_thing_by_title, get_parameter
+from .schemas import ParameterRead, ParameterUpdate, ParameterCreate, ParameterDelete, ParameterThingRead, \
+    ParameterAuthoriz
 
 router_parameter = APIRouter(
     prefix="/parameter",
@@ -11,123 +14,115 @@ router_parameter = APIRouter(
 )
 
 
-# None tested
-# @router_parameter.get("/get_parameters_by_thing_name/{thing_name}")
-# async def parameters_get_by_thing_name(
-#         thing_name: str,
-#         session=Depends(get_async_session)
-# ) -> Optional[List[ParameterRead]]:
-#     try:
-#         async with session:
-#             thing = await session.execute(select(ThingORM).where(ThingORM.title == thing_name))
-#             thing = thing.scalars().first()
-#             if thing is None:
-#                 return None
-#             query = select(ParameterORM).join(ThingParameterORM).where(ThingParameterORM.thing_id == thing.id)
-#             result = await session.execute(query)
-#             parameters = result.scalars().all()
-#             if parameters:
-#                 return [ParameterRead.from_orm(parameter) for parameter in parameters]
-#             return None
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         return None
+# Нужно написать для всех unit тесты
+# Робит
+@router_parameter.post("/parameter_create/{thing_title}")
+async def parameter_create(
+        thing_title: str,
+        parameter: ParameterCreate,
+        session=Depends(get_async_session),
+        user: UserORM = Depends(current_user),
+) -> JSONResponse:
+    try:
+        async with session:
+            new_param = ParameterORM(**parameter.dict())
+            session.add(new_param)
+            await session.commit()
+
+            thing_id = await get_thing_by_title(thing_title, user)
+            if thing_id is None:
+                raise ValueError(f"Thing with title '{thing_title}' not found")
+
+            new_thing_param = ThingParameterORM(thing_id=thing_id.id, parameter_id=new_param.id)
+            session.add(new_thing_param)
+            await session.commit()
+            if new_thing_param:
+                return JSONResponse(status_code=200,
+                                    content={"status": "success",
+                                             "data": ParameterThingRead.from_orm(new_thing_param).dict()})
+            else:
+                raise HTTPException(status_code=400, detail="No data found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-# @router_parameter.put("/update/{parameter_id}")
-# async def parameter_update(
-#         parameter_id: int,
-#         parameter: ParameterUpdate,
-#         session=Depends(get_async_session)):
-#     try:
-#         async with session:
-#             stmt = update(ParameterORM).where(
-#                 ParameterORM.id == parameter_id
-#             ).values(
-#                 key=parameter.key,
-#                 value=parameter.value
-#             )
-#         await session.execute(stmt)
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         return None
+# Робит
+@router_parameter.get("/get_parameters_by_thing_name/{thing_title}")
+async def parameters_get_by_thing_title(
+        thing_name: str,
+        session=Depends(get_async_session),
+        user: UserORM = Depends(current_user)
+) -> JSONResponse:
+    try:
+        async with session:
+            thing = await get_thing_by_title(thing_name, user)
+            if thing is None:
+                raise HTTPException(status_code=500, detail="Didn't find such a thing")
+
+            result = await session.execute(
+                select(ParameterORM).join(ThingParameterORM).where(ThingParameterORM.thing_id == thing.id)
+            )
+            parameters = result.scalars().all()
+            if parameters:
+                result = [ParameterRead.from_orm(parameter).dict() for parameter in parameters]
+                return JSONResponse(status_code=200, content={"status": "success", "data": result})
+            else:
+                raise HTTPException(status_code=400, detail="No data found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-# @router_parameter.delete("/delete/{parameter_id}")
-# async def parameter_delete_by_id(
-#         parameter_id: str,
-#         session=Depends(get_async_session)):
-#     try:
-#         async with session:
-#             stmt = delete(ParameterORM).where(ParameterORM.id == parameter_id)
-#             n_stmt = delete(ThingParameterORM).where(ThingParameterORM.parameter_id == parameter_id)
-#             await session.execute(stmt, n_stmt)
-#             await session.commit()
-#             return {"status": "success"}
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         return None
+# Робит
+@router_parameter.delete("/delete_parameter")
+async def delete_parameter(
+        par_del: ParameterDelete,
+        session=Depends(get_async_session),
+        user: UserORM = Depends(current_user)
+) -> JSONResponse:
+    try:
+        async with session:
+            thing = await get_thing_by_title(par_del.thing_title, user)
+            parameter = await get_parameter(thing.id, par_del.key, par_del.value)
+
+            del_thing_param = delete(ThingParameterORM).where(
+                and_(
+                    ThingParameterORM.thing_id == thing.id,
+                    ThingParameterORM.parameter_id == parameter.id
+                )
+            )
+            del_param = delete(ParameterORM).where(ParameterORM.id == parameter.id)
+
+            await session.execute(del_thing_param)
+            await session.execute(del_param)
+            await session.commit()
+
+            return JSONResponse(status_code=200, content={"status": "success"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-# @router_parameter.delete("/delete/")
-# async def delete(
-#         par_del: ParameterDelete,
-#         session=Depends(get_async_session)):
-#     try:
-#         async with session:
-#             stmt = (
-#                 select(ThingParameterORM.parameter_id).
-#                 join(ParameterORM, ParameterORM.id == ThingParameterORM.parameter_id).
-#                 join(ThingORM, ThingORM.id == ThingParameterORM.thing_id).
-#                 where(
-#                     and_(
-#                         ThingORM.title == par_del.thing_title,
-#                         ParameterORM.key == par_del.key
-#                     )
-#                 )
-#             )
-#             result = await session.execute(stmt)
-#             parameter_id = result.scalar_one()
-#
-#             del_in_thing_param = delete(ThingParameterORM).where(
-#                 ThingParameterORM.parameter_id == parameter_id
-#             )
-#             stmt = delete(ParameterORM).where(ParameterORM.id == parameter_id)
-#
-#             await session.execute(stmt)
-#             await session.execute(del_in_thing_param)
-#             await session.commit()
-#             return {"status": "success"}
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         return None
-#
-#
-# @router_parameter.post("/parameter_create/{thing_title}")
-# async def parameter_create(
-#         thing_title: str,
-#         parameter: ParameterCreate,
-#         session=Depends(get_async_session)
-# ):
-#     try:
-#         async with session:
-#             new_param = ParameterORM(**parameter.dict())
-#             session.add(new_param)
-#             await session.commit()
-#
-#             result = await session.execute(
-#                 select(ThingORM.id).where(ThingORM.title == thing_title)
-#             )
-#             thing_id = result.scalar_one_or_none()
-#             if thing_id is None:
-#                 raise ValueError(f"Thing with title '{thing_title}' not found")
-#
-#             new_thing_param = ThingParameterORM(thing_id=thing_id, parameter_id=new_param.id)
-#             session.add(new_thing_param)
-#             await session.commit()
-#
-#             return {"status": "success"}
-#
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         return None
+# Робит
+@router_parameter.put("/update/{parameter_id}")
+async def parameter_update(
+        old_param: ParameterAuthoriz,
+        new_parameter: ParameterUpdate,
+        session=Depends(get_async_session),
+        user: UserORM = Depends(current_user)
+) -> JSONResponse:
+    try:
+        async with session:
+            thing = await get_thing_by_title(old_param.thing_title, user)
+            get_old_parameter = await get_parameter(thing.id, old_param.key, old_param.value)
+
+            stmt = update(ParameterORM).where(
+                ParameterORM.id == get_old_parameter.id
+            ).values(
+                key=new_parameter.key,
+                value=new_parameter.value
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+            return JSONResponse(status_code=200, content={"status": "success"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

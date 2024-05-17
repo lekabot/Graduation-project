@@ -13,6 +13,8 @@ from auth.manager import UserManager
 from src.database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
+
+
 @pytest.fixture
 def anyio_backend():
     return 'asyncio'
@@ -22,3 +24,5 @@ def anyio_backend():
 async def client():
     async with AsyncClient(app=app, base_url="http://127.0.0.1") as client:
         yield client
+
+# create_empty_endpoint, delete_by_username, get_group_by_user_id have been tested in user register

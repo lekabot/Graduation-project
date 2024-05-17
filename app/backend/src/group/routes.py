@@ -1,5 +1,4 @@
-from typing import Optional, List
-from sqlalchemy import select, delete, update, join, and_
+from sqlalchemy import select, delete
 from fastapi import APIRouter, Depends
 from models import GroupORM, UserORM
 from database import get_async_session
@@ -40,13 +39,13 @@ async def delete_by_username(
             raise HTTPException(status_code=400, detail="No data found")
 
 
-@router_group.get("/get_group_by_user_id/{user_id}")
+@router_group.get("/get_group_by_user_id/{owner_id}")
 async def get_group_by_user_id(
-        user_id: int,
+        owner_id: int,
         session=Depends(get_async_session)):
     async with session.begin():
         query = await session.execute(
-            select(GroupORM).where(GroupORM.owner_id == user_id)
+            select(GroupORM).where(GroupORM.owner_id == owner_id)
         )
         group_orms = query.scalars().all()
         if group_orms:
