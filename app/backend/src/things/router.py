@@ -1,9 +1,9 @@
 from parameters.manager import get_thing_by_title
-from .manager import get_curr_user_group
-from .schemas import ThingRead, ThingCreate, UserGroupRead
+from .manager import get_curr_user_group, add_thing_logic, delete_thing_logic
+from .schemas import ThingRead
 from sqlalchemy import select, delete, and_, update
 from fastapi import APIRouter, Depends, HTTPException
-from models import ThingORM, UserORM, GroupORM, UserGroupORM
+from models import ThingORM, UserORM, UserGroupORM
 from database import get_async_session
 from fastapi.responses import JSONResponse
 from auth.base_config import current_user
@@ -43,43 +43,23 @@ async def get_by_name(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Робит
-@router_thing.post("/add_thing")
+@router_thing.post("/add_thing/{thing_title}")
 async def add_thing(
-        thing: ThingCreate,
+        thing_title: str,
         session=Depends(get_async_session),
         user: UserORM = Depends(current_user)
 ) -> JSONResponse:
     try:
         async with session:
-            query = await session.execute(
-                select(GroupORM.id).where(GroupORM.owner_id == user.id)
-            )
-            group_id = query.scalar()
-
-            new_thing = ThingORM(**thing.dict())
-            session.add(new_thing)
-            await session.commit()
-            await session.refresh(new_thing)
-
-            add_in_user_group = UserGroupORM(
-                group_id=group_id,
-                thing_id=new_thing.id,
-                user_id=user.id)
-            session.add(add_in_user_group)
-            await session.commit()
-
+            result = await add_thing_logic(thing_title, session, user)
             return JSONResponse(
                 status_code=200,
-                content={"status": "success",
-                         "data": UserGroupRead.from_orm(add_in_user_group).dict()}
+                content={"status": "success", "data": result}
             )
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Робит
 @router_thing.delete("/delete_thing_by_title/{title}")
 async def delete_thing(
         title: str,
@@ -88,26 +68,11 @@ async def delete_thing(
 ) -> JSONResponse:
     try:
         async with session:
-            query_thing_id = await session.execute(
-                select(ThingORM.id).where(ThingORM.title == title)
-            )
-            thing_id = query_thing_id.scalar()
-            group_id = await get_curr_user_group(user)
-
-            del_in_usr_group = delete(UserGroupORM).where(and_(
-                UserGroupORM.thing_id == thing_id,
-                UserGroupORM.group_id == group_id
-            ))
-            res = delete(ThingORM).where(ThingORM.title == title)
-
-            await session.execute(del_in_usr_group)
-            await session.execute(res)
-            await session.commit()
+            result = await delete_thing_logic(title, session, user)
             return JSONResponse(
                 status_code=200,
-                content={"status": "success"}
+                content=result
             )
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

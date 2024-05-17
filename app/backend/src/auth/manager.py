@@ -7,11 +7,15 @@ from fastapi_users import (BaseUserManager, IntegerIDMixin, exceptions, models,
 from sqlalchemy import select, delete, Select
 
 from group.manager import create_group
-from models import UserORM
+from models import UserORM, ThingORM, UserGroupORM
 from auth.utils import get_user_db
 from config import SECRET_AUTH
 from database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from parameters.manager import delete_parameter_logic
+from parameters.schemas import ParameterDelete
+from things.manager import delete_thing_logic
 from .schemas import UserRead
 from auth.schemas import UserCreate
 from fastapi_users.exceptions import UserAlreadyExists
@@ -44,8 +48,25 @@ async def create_user(email: str, username: str, password: str):
         raise
 
 
-async def delete_by_username(username: str) -> int:
+async def delete_by_username(
+        username: str
+) -> int:
     async with get_async_session_context() as session:
+        user_orm = await get_user_orm_by_username(username)
+
+        query = select(ThingORM).join(
+            UserGroupORM, UserGroupORM.thing_id == user_orm.id
+        ).where(
+            UserGroupORM.user_id == user_orm.id
+        )
+
+        res = await session.execute(query)
+        all_thing_for_user = res.scalars().all()
+
+        for thing in all_thing_for_user:
+            await delete_parameter_logic(ParameterDelete(thing_title=thing.title), session, user_orm)
+            await delete_thing_logic(thing.title, session, user_orm)
+
         request = (
             delete(UserORM)
             .where(UserORM.username == username)
@@ -76,6 +97,13 @@ async def get_by_username(username) -> Optional[UserRead]:
 async def _get_user(statement: Select, session: AsyncSession):
     results = await session.execute(statement)
     return results.unique().scalar_one_or_none()
+
+
+async def get_user_orm_by_username(username: str) -> Optional[UserORM]:
+    async with get_async_session_context() as session:
+        statement = select(UserORM).where(UserORM.username == username)
+        user_orm = await _get_user(statement, session)
+        return user_orm
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[UserORM, int]):
