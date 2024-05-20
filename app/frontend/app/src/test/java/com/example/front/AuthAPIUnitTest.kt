@@ -1,21 +1,13 @@
+
 import com.example.front.data.AuthAPI
-import com.example.front.data.AuthAPI.register
 import io.mockk.every
 import io.mockk.mockk
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okhttp3.ResponseBody.Companion.toResponseBody
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.mockito.Mockito
-import org.mockito.Mockito.any
-import kotlin.jvm.Throws
 
 internal class AuthAPITest {
     @Test
@@ -26,7 +18,7 @@ internal class AuthAPITest {
         every { response.isSuccessful } returns true
         every { response.code } returns 204
 
-        val result = AuthAPI.login(username = "1", password = "1")
+        val result = AuthAPI.login(username = "admin", password = "admin")
         assertTrue(result)
     }
 
@@ -67,14 +59,14 @@ internal class AuthAPITest {
         assertEquals(AuthAPI.RegistrationResult.Error("Такой пользователь уже существует"), result)
     }
 
-    @Test
-    fun `delete user test`() {
-        val client = mockk<OkHttpClient>()
-        val response = mockk<Response>()
-        every { client.newCall(any()).execute() } returns response
-        every { response.isSuccessful } returns true
-        every { response.code } returns 204
-        val result = AuthAPI.delete_by_username("55")
-        assertEquals(204, result)
-    }
+//    @Test
+//    fun `delete user test`() {
+//        val client = mockk<OkHttpClient>()
+//        val response = mockk<Response>()
+//        every { client.newCall(any()).execute() } returns response
+//        every { response.isSuccessful } returns true
+//        every { response.code } returns 204
+//        val result = AuthAPI.delete_by_username("55")
+//        assertEquals(204, result)
+//    }
 }

@@ -5,5 +5,6 @@
     <string name="reg_err_1">Такой пользователь уже существует</string>
     <string name="title_activity_qractivity">QRActivity</string>
     <string name="title_activity_finder">Finder</string>
+    <string name="find_name">Поиск...</string>
 
 </resources>
