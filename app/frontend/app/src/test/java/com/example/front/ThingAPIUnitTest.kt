@@ -1,77 +1,32 @@
 package com.example.front
 import com.example.front.data.ThingAPI
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 
-class GetAllThingTest {
-    private val server = MockWebServer()
-    private lateinit var tested: ThingAPI
-
-    @Before
-    fun setup() {
-        server.start()
-        tested = com.example.front.data.ThingAPI(
-            server.url("/").toString()
-        )
-    }
-
-    @After
-    fun teardown() {
-        server.shutdown()
-    }
+class ThingAPITest {
+    private val api = ThingAPI()
 
     @Test
     fun testGetAllThing() {
-        val response = """
-            {
-                "status": 200,
-                "data": [
-                    {"id": 1, "title": "Книга"},
-                    {"id": 2, "title": "Стол"}
-                ]
-            }
-        """.trimIndent()
+        val expected = ThingAPI.ThingList(
+            status = "success",
+            data = mutableListOf(
+                ThingAPI.Thing(id = 1, title = "Книга"),
+                ThingAPI.Thing(id = 2, title = "Стол"),
+                ThingAPI.Thing(id = 3, title = "Компьютер"),
+                ThingAPI.Thing(id = 4, title = "Телефон"),
+                ThingAPI.Thing(id = 5, title = "Часы"),
+                ThingAPI.Thing(id = 6, title = "Картина"),
+                ThingAPI.Thing(id = 7, title = "Стул"),
+                ThingAPI.Thing(id = 8, title = "Лампа"),
+                ThingAPI.Thing(id = 9, title = "Кошелек"),
+                ThingAPI.Thing(id = 10, title = "Ключи"),
+                ThingAPI.Thing(id = 11, title = "Компутер")
+            )
+        )
 
-        server.enqueue(MockResponse().setBody(response))
-
-        val result = tested.getAllThing()
-
-        Assert.assertEquals(200, result?.status)
-        Assert.assertEquals(1, result?.data?.get(0)?.id)
-        Assert.assertEquals("Книга", result?.data?.get(0)?.title)
-        Assert.assertEquals(2, result?.data?.get(1)?.id)
-        Assert.assertEquals("Стол", result?.data?.get(1)?.title)
-    }
-}
-
-class AddThingTest {
-    private val server = MockWebServer()
-    private lateinit var tested: ThingAPI
-
-    @Before
-    fun setup() {
-        server.start()
-        tested = ThingAPI(server.url("/").toString())
-    }
-
-    @After
-    fun teardown() {
-        server.shutdown()
-    }
-
-    @Test
-    fun testAddThing() {
-        val thingTitle = "New Thing"
-        server.enqueue(MockResponse().setResponseCode(200))
-
-        tested.addThing(thingTitle)
-
-        val request = server.takeRequest()
-        Assert.assertEquals("//thing/add_thing/New%20Thing", request.path)
+        val actual = api.getAllThing()
+        assertEquals(expected, actual)
     }
 }

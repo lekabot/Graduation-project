@@ -1,5 +1,6 @@
 import os
 import sys
+import uuid
 
 import pytest
 
@@ -21,17 +22,21 @@ async def test_authentication():
     assert response.status_code == 204
 
 
+unique_username = str(uuid.uuid4())
+unique_email = f"{unique_username}@example.com"
+
+
 @pytest.mark.anyio
 async def test_registration():
     async with AsyncClient(app=app, base_url="http://127.0.0.1") as ac:
         response = await ac.post("/auth/register",
                                  json={
-                                     "email": "string1",
+                                     "email": unique_email,
                                      "password": "string",
                                      "is_active": True,
                                      "is_superuser": False,
                                      "is_verified": False,
-                                     "username": "string1"
+                                     "username": unique_username
                                  })
 
         assert response.status_code == 201
@@ -40,7 +45,7 @@ async def test_registration():
         user_id = response_data["id"]
         group_create_response = await ac.get(f"/group/get_group_by_user_id/{user_id}")
 
-        username = "string1"
+        username = unique_username
 
         await ac.delete(f"/group/delete_by_username/{username}")
         await ac.delete(f"/user/delete_by_username/{username}")
@@ -52,20 +57,20 @@ async def test_delete_by_username_user_found():
     async with AsyncClient(app=app, base_url="http://127.0.0.1") as ac:
         await ac.post("/auth/register",
                       json={
-                          "email": "string1",
+                          "email": unique_email,
                           "password": "string",
                           "is_active": True,
                           "is_superuser": False,
                           "is_verified": False,
-                          "username": "string1"
+                          "username": unique_username
                       })
-        username = "string1"
+        username = unique_username
         response = await ac.delete(f"/user/delete_by_username/{username}")
     assert response.status_code == 204
 
 
 async def test_delete_by_username_link_user_not_found():
-    username = "333199y39h932gf9073g27f9g3207gf3280fg823gf80327gf832f"
+    username = unique_username
     async with AsyncClient(app=app, base_url="http://127.0.0.1") as ac:
         response = await ac.delete(f"/user/delete_by_username/{username}")
     assert response.status_code == 404

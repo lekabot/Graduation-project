@@ -8,7 +8,7 @@ import okio.IOException
 class ThingAPI(val host: String = "http://192.168.31.186:1234") {
 
     private val client = OkHttpClient()
-    data class ThingList(val status: Int, val data: MutableList<Thing>)
+    data class ThingList(val status: String, val data: MutableList<Thing>)
     data class Thing(val id: Int, val title: String)
     fun getAllThing(): ThingList? {
         val request = Request.Builder()

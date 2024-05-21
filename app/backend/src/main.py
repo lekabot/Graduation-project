@@ -5,10 +5,25 @@ from auth.schemas import UserRead, UserCreate
 from things.router import router_thing
 from parameters.routes import router_parameter
 from group.routes import router_group
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Tvoya mama fantastika",
     version="1.0.0"
+)
+
+origins = [
+    "http://localhost",
+    "http://localhost:1234",
+    "http://192.168.31.186:1234/*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(
