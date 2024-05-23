@@ -21,6 +21,7 @@ class UserORM(SQLAlchemyBaseUserTable[int], Base):
     user_groups = relationship("UserGroupORM", back_populates="user")
     groups = relationship("GroupORM", back_populates="owner")
 
+
 class ThingORM(Base):
     __tablename__ = "thing"
 

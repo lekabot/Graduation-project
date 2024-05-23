@@ -27,14 +27,20 @@ services:
       - db
     command: ["../docker/app.sh"]
     ports:
-      - 1234:8000
+      - "1234:8000"
 
   nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - "80:80"
+    container_name: "nginx"
+    restart: always
+    image: nginx
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
     depends_on:
+      - app
+      - pgadmin
+      - db
+    links:
       - app

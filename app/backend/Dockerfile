@@ -13,5 +13,3 @@ COPY . .
 WORKDIR ./src
 
 RUN chmod a+x ../docker/*.sh
-
-#CMD ["python", "./tests/test_data.py"]

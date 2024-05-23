@@ -49,7 +49,6 @@ async def parameters_get_by_thing_title(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
 @router_parameter.delete("/delete_parameter")
 async def delete_parameter(
         par_del: ParameterDelete,

@@ -20,9 +20,10 @@ from .schemas import UserRead
 from auth.schemas import UserCreate
 from fastapi_users.exceptions import UserAlreadyExists
 from group.schemas import UserEmptyGroupCreate
+from fastapi_users.db import SQLAlchemyUserDatabase
 
 
-async def get_user_manager(user_db=Depends(get_user_db)):
+async def get_user_manager(user_db: SQLAlchemyUserDatabase=Depends(get_user_db)):
     yield UserManager(user_db)
 
 
