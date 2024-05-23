@@ -6,7 +6,7 @@ from fastapi_users import (BaseUserManager, IntegerIDMixin, exceptions, models,
                            schemas)
 from sqlalchemy import select, delete, Select
 
-from group.manager import create_group
+from group.manager import create_group, delete_user_groups
 from models import UserORM, ThingORM, UserGroupORM
 from auth.utils import get_user_db
 from config import SECRET_AUTH
@@ -68,11 +68,14 @@ async def delete_by_username(
             await delete_parameter_logic(ParameterDelete(thing_title=thing.title), session, user_orm)
             await delete_thing_logic(thing.title, session, user_orm)
 
+        await delete_user_groups(username)
+
         request = (
             delete(UserORM)
             .where(UserORM.username == username)
         )
         result = await session.execute(request)
+
         if result.rowcount == 0:
             return 1
         await session.commit()

@@ -6,7 +6,12 @@ from auth.manager import get_user_manager
 from models import UserORM
 from config import SECRET_AUTH
 
-cookie_transport = CookieTransport(cookie_name="bonds", cookie_max_age=3600)
+cookie_transport = CookieTransport(
+    cookie_name="bonds",
+    cookie_max_age=3600,
+    cookie_secure=False,
+    cookie_samesite="lax"
+)
 
 
 def get_jwt_strategy() -> JWTStrategy:

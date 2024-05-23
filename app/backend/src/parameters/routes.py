@@ -1,4 +1,4 @@
-from sqlalchemy import update, and_, delete
+from sqlalchemy import update
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from auth.base_config import current_user

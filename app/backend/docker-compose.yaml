@@ -28,6 +28,8 @@ services:
     command: ["../docker/app.sh"]
     ports:
       - "1234:8000"
+    volumes:
+      - ./src:/apping/src
 
   nginx:
     container_name: "nginx"
