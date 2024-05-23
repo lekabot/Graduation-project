@@ -11,12 +11,12 @@ import java.io.IOException
 
 object AuthAPI {
 
-    private const val HOST = "http://192.168.31.186:1234"
     fun login(
         username: String,
-        password: String
+        password: String,
+        host: String = "http://192.168.31.186:1234"
     ): Boolean {
-        val url = "$HOST/auth/login"
+        val url = "$host/auth/login"
         val client = OkHttpClient()
 
         val formBody = FormBody.Builder()
@@ -49,9 +49,10 @@ object AuthAPI {
         email: String,
         username: String,
         password: String,
+        host: String = "http://192.168.31.186:1234"
     ): RegistrationResult {
         val client = OkHttpClient()
-        val url = "$HOST/auth/register"
+        val url = "$host/auth/register"
 
         val json = JSONObject()
         json.put("email", email)

@@ -18,7 +18,7 @@ internal class AuthAPITest {
         every { response.isSuccessful } returns true
         every { response.code } returns 204
 
-        val result = AuthAPI.login(username = "admin", password = "admin")
+        val result = AuthAPI.login(username = "admin", password = "admin", host = "http://localhost:80")
         assertTrue(result)
     }
 
