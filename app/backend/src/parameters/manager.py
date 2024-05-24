@@ -37,10 +37,10 @@ async def get_parameter(
 
 
 async def get_parameters_by_thing_title_logic(
-        thing_name: str,
+        thing_title: str,
         session,
         user: UserORM):
-    thing = await get_thing_by_title(thing_name, user)
+    thing = await get_thing_by_title(thing_title, user)
     if thing is None:
         raise HTTPException(status_code=500, detail="Didn't find such a thing")
 

@@ -34,13 +34,13 @@ async def parameter_create(
 
 @router_parameter.get("/get_parameters_by_thing_name/{thing_title}")
 async def parameters_get_by_thing_title(
-        thing_name: str,
+        thing_title: str,
         session=Depends(get_async_session),
         user: UserORM = Depends(current_user)
 ) -> JSONResponse:
     try:
         async with session:
-            result = await get_parameters_by_thing_title_logic(thing_name, session, user)
+            result = await get_parameters_by_thing_title_logic(thing_title, session, user)
             return JSONResponse(
                 status_code=200,
                 content={"status": "success", "data": result}
@@ -67,7 +67,7 @@ async def delete_parameter(
 
 
 # Робит
-@router_parameter.put("/update/{parameter_id}")
+@router_parameter.put("/update/")
 async def parameter_update(
         old_param: ParameterAuthoriz,
         new_parameter: ParameterUpdate,
