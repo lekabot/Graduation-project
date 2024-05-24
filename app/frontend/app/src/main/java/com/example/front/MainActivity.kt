@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun LoginScreen() {
+        val api = AuthAPI()
         val context = LocalContext.current
         var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
@@ -88,7 +89,7 @@ class MainActivity : ComponentActivity() {
             Button(
                 onClick = {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val loggedIn = AuthAPI.login(username, password, host = "http://127.0.0.1:80")
+                        val loggedIn = api.login(username, password)
                         withContext(Dispatchers.Main) {
                             if (loggedIn) {
                                 errorMessage = "Вы вошли"

@@ -3,76 +3,40 @@ package com.example.front.data
 import com.google.gson.Gson
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
-import okio.IOException
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
+import java.net.URLEncoder
 
-class ThingAPI(private val host: String = "http://192.168.31.186:80") {
-
+class ParameterAPI(private val host: String = "http://192.168.31.186:80") {
     private val client = OkHttpClient.Builder()
         .cookieJar(MyCookieJar())
         .build()
-    data class ThingList(val status: String, val data: MutableList<Thing>)
-    data class Thing(val id: Int, val title: String)
 
-    fun getAllThing(): ThingList {
+    data class ParameterList(val status: String, val data: MutableList<Parameter>)
+    data class Parameter(val id: Int, val key: String, val value: String)
+
+    data class OldParameter(val thingTitle: String, val key: String, val value: String)
+    data class NewParameter(val key: String, val value: String)
+
+    fun createParameter(thingTitle: String, key: String, value: String): Int {
         val token = TokenManager.getToken() ?: throw IOException("Token not found")
-        val requestUrl = "$host/thing/get_all_thing_for_user/"
+        val requestUrl = "$host/parameter/parameter_create/$thingTitle"
 
-        val request = Request.Builder()
-            .url(requestUrl)
-            .build()
-
-        val cookie = Cookie.Builder()
-            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
-            .path("/")
-            .name("bonds")
-            .value(token)
-            .httpOnly()
-            .build()
-
-        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
-
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
-            val thingList = Gson().fromJson(response.body!!.string(), ThingList::class.java)
-            return thingList
+        val json = """
+        {
+          "key": "$key",
+          "value": "$value"
         }
-    }
+        """.trimIndent()
 
-    fun getThing(title: String): ThingList {
-        val token = TokenManager.getToken() ?: throw IOException("Token not found")
-        val requestUrl = "$host/thing/get_by_name/$title"
+        val requestBody = json.toRequestBody("application/json".toMediaType())
 
         val request = Request.Builder()
             .url(requestUrl)
-            .build()
-
-        val cookie = Cookie.Builder()
-            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
-            .path("/")
-            .name("bonds")
-            .value(token)
-            .httpOnly()
-            .build()
-
-        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
-
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
-            val thing = Gson().fromJson(response.body!!.string(), ThingList::class.java)
-            return thing
-        }
-    }
-
-    fun addThing(title: String): Int {
-        val token = TokenManager.getToken() ?: throw IOException("Token not found")
-        val requestUrl = "$host/thing/add_thing/$title"
-
-        val request = Request.Builder()
-            .url(requestUrl)
-            .post(RequestBody.create(null, ByteArray(0)))
+            .post(requestBody)
             .build()
 
         val cookie = Cookie.Builder()
@@ -91,13 +55,49 @@ class ThingAPI(private val host: String = "http://192.168.31.186:80") {
         }
     }
 
-    fun updateThingName(oldTitle: String, newTitle: String): Int {
+    fun getParameters(thingTitle: String): ParameterList {
         val token = TokenManager.getToken() ?: throw IOException("Token not found")
-        val requestUrl = "$host/thing/update_name/$oldTitle/$newTitle"
+        val encodedTitle = URLEncoder.encode(thingTitle, "UTF-8")
+        val requestUrl = "$host/parameter/get_parameters_by_thing_name/$encodedTitle"
 
         val request = Request.Builder()
             .url(requestUrl)
-            .put(RequestBody.create(null, ByteArray(0)))
+            .build()
+
+        val cookie = Cookie.Builder()
+            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
+            .path("/")
+            .name("bonds")
+            .value(token)
+            .httpOnly()
+            .build()
+
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+            val parameterList = Gson().fromJson(response.body!!.string(), ParameterList::class.java)
+            return parameterList
+        }
+    }
+
+    fun deleteParameter(thingTitle: String, key: String, value: String): Int {
+        val token = TokenManager.getToken() ?: throw IOException("Token not found")
+        val requestUrl = "$host/parameter/delete_parameter"
+
+        val json = """
+        {
+          "thing_title": "$thingTitle",
+          "key": "$key",
+          "value": "$value"
+        }
+        """.trimIndent()
+
+        val requestBody = json.toRequestBody("application/json".toMediaType())
+
+        val request = Request.Builder()
+            .url(requestUrl)
+            .delete(requestBody)
             .build()
 
         val cookie = Cookie.Builder()
@@ -116,13 +116,29 @@ class ThingAPI(private val host: String = "http://192.168.31.186:80") {
         }
     }
 
-    fun deleteThing(title: String): Int {
+    fun updateParameter(oldParameter: OldParameter, newParameter: NewParameter): Int {
         val token = TokenManager.getToken() ?: throw IOException("Token not found")
-        val requestUrl = "$host/thing/delete_thing_by_title/$title"
+        val requestUrl = "$host/parameter/update/"
+
+        val json = """
+        {
+          "old_param": {
+            "thing_title": "${oldParameter.thingTitle}",
+            "key": "${oldParameter.key}",
+            "value": "${oldParameter.value}"
+          },
+          "new_parameter": {
+            "key": "${newParameter.key}",
+            "value": "${newParameter.value}"
+          }
+          }
+        """.trimIndent()
+
+        val requestBody = json.toRequestBody("application/json".toMediaType())
 
         val request = Request.Builder()
             .url(requestUrl)
-            .delete()
+            .put(requestBody)
             .build()
 
         val cookie = Cookie.Builder()
@@ -140,6 +156,4 @@ class ThingAPI(private val host: String = "http://192.168.31.186:80") {
             return response.code
         }
     }
-
 }
-

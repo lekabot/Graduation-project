@@ -43,15 +43,15 @@ async def get_by_name(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router_thing.post("/add_thing/{thing_title}")
+@router_thing.post("/add_thing/{title}")
 async def add_thing(
-        thing_title: str,
+        title: str,
         session=Depends(get_async_session),
         user: UserORM = Depends(current_user)
 ) -> JSONResponse:
     try:
         async with session:
-            result = await add_thing_logic(thing_title, session, user)
+            result = await add_thing_logic(title, session, user)
             return JSONResponse(
                 status_code=200,
                 content={"status": "success", "data": result}
@@ -100,7 +100,7 @@ async def get_all_thing_for_user(
 
 
 @router_thing.put("/update_name/{thing_title}/{new_title}")
-async def update_name(
+async def update_title(
         thing_title: str,
         new_title: str,
         session=Depends(get_async_session),

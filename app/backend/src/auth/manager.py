@@ -1,10 +1,12 @@
 import contextlib
-from typing import Optional
-
+import jwt
+from datetime import datetime, timedelta
+from typing import Optional, Dict
 from fastapi import Depends, Request
 from fastapi_users import (BaseUserManager, IntegerIDMixin, exceptions, models,
                            schemas)
 from sqlalchemy import select, delete, Select
+from starlette.responses import Response
 
 from group.manager import create_group, delete_user_groups
 from models import UserORM, ThingORM, UserGroupORM
@@ -23,7 +25,7 @@ from group.schemas import UserEmptyGroupCreate
 from fastapi_users.db import SQLAlchemyUserDatabase
 
 
-async def get_user_manager(user_db: SQLAlchemyUserDatabase=Depends(get_user_db)):
+async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
     yield UserManager(user_db)
 
 
@@ -98,11 +100,6 @@ async def get_by_username(username) -> Optional[UserRead]:
             return UserRead.from_orm(user_orm)
 
 
-async def _get_user(statement: Select, session: AsyncSession):
-    results = await session.execute(statement)
-    return results.unique().scalar_one_or_none()
-
-
 async def get_user_orm_by_username(username: str) -> Optional[UserORM]:
     async with get_async_session_context() as session:
         statement = select(UserORM).where(UserORM.username == username)
@@ -110,23 +107,24 @@ async def get_user_orm_by_username(username: str) -> Optional[UserORM]:
         return user_orm
 
 
+async def _get_user(statement: Select, session: AsyncSession):
+    results = await session.execute(statement)
+    return results.unique().scalar_one_or_none()
+
+
 class UserManager(IntegerIDMixin, BaseUserManager[UserORM, int]):
     reset_password_token_secret = SECRET_AUTH
     verification_token_secret = SECRET_AUTH
 
-    async def on_after_register(self, user: UserORM,
-                                request: Optional[Request] = None
-                                ) -> None:
-        user_data = UserEmptyGroupCreate(
-            username=user.username,
-            user_id=user.id)
+    async def on_after_register(self, user: UserORM, request: Optional[Request] = None) -> None:
+        user_data = UserEmptyGroupCreate(username=user.username, user_id=user.id)
         await create_group(user_data)
 
     async def create(
-            self,
-            user_create: schemas.UC,
-            safe: bool = False,
-            request: Optional[Request] = None,
+        self,
+        user_create: schemas.UC,
+        safe: bool = False,
+        request: Optional[Request] = None,
     ) -> models.UP:
         await self.validate_password(user_create.password, user_create)
 

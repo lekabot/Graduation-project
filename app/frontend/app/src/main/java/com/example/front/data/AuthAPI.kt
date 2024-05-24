@@ -1,24 +1,31 @@
 package com.example.front.data
 
+import okhttp3.Cookie
 import okhttp3.FormBody
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
 
 
-object AuthAPI {
+class AuthAPI(private val host: String = "http://192.168.31.186:80") {
 
-    fun login(
-        username: String,
-        password: String,
-        host: String = "http://192.168.31.186:1234"
-    ): Boolean {
+    private val client = OkHttpClient.Builder()
+        .cookieJar(MyCookieJar())
+        .build()
+
+
+    sealed class RegistrationResult {
+        data object Success : RegistrationResult()
+        data class Error(val message: String) : RegistrationResult()
+    }
+
+    fun login(username: String, password: String): Boolean {
         val url = "$host/auth/login"
-        val client = OkHttpClient()
-
         val formBody = FormBody.Builder()
             .add("username", username)
             .add("password", password)
@@ -29,29 +36,56 @@ object AuthAPI {
             .post(formBody)
             .build()
 
-        return try {
-            val response = client.newCall(request).execute()
-            response.isSuccessful
-        } catch (e: IOException) {
-            false
-        } catch (e: Exception) {
-            false
+        val response = client.newCall(request).execute()
+
+        if (!response.isSuccessful) {
+            return false
+        }
+
+        val cookies = response.headers("Set-Cookie")
+
+        var token: String? = null
+        cookies.forEach { cookie ->
+            if (cookie.startsWith("bonds=")) {
+                token = cookie.substringAfter("bonds=").substringBefore(";")
+                TokenManager.setToken(token!!)
+                return@forEach
+            }
+        }
+        return true
+    }
+
+    fun logout(): Int {
+        val token = TokenManager.getToken() ?: throw IOException("Token not found")
+
+        val requestUrl = "$host/auth/logout"
+        val request = Request.Builder()
+            .url(requestUrl)
+            .post(RequestBody.create(null, ByteArray(0)))
+            .build()
+
+        val cookie = Cookie.Builder()
+            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
+            .path("/")
+            .name("bonds")
+            .value(token)
+            .httpOnly()
+            .build()
+
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+            return response.code
         }
     }
 
-
-    sealed class RegistrationResult {
-        data object Success : RegistrationResult()
-        data class Error(val message: String) : RegistrationResult()
-    }
 
     fun register(
         email: String,
         username: String,
         password: String,
-        host: String = "http://192.168.31.186:1234"
     ): RegistrationResult {
-        val client = OkHttpClient()
         val url = "$host/auth/register"
 
         val json = JSONObject()
@@ -85,17 +119,38 @@ object AuthAPI {
         }
     }
 
-//    fun deleteByUsername(username: String): Int {
-//        val client = OkHttpClient()
-//        val url = "http://192.168.31.186:1234/user/delete_by_username/$username"
-//        val request = Request.Builder()
-//            .url(url)
-//            .delete()
-//            .build()
-//        client.newCall(request).execute().use { response ->
-//            if (!response.isSuccessful) throw IOException("Unexpected code $response")
-//            return response.code
-//        }
-//    }
+    fun deleteByUsername(username: String): Int {
+        val url = "$host/user/delete_by_username/$username"
+        val request = Request.Builder()
+            .url(url)
+            .delete()
+            .build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+            return response.code
+        }
+    }
+
+    fun checkUserIsAuth(token: String? = null): Int {
+        val requestUrl = "$host/protected-route"
+        val request = Request.Builder()
+            .url(requestUrl)
+            .get()
+            .build()
+
+        val cookie = Cookie.Builder()
+            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
+            .path("/")
+            .name("bonds")
+            .value(token ?: "")
+            .httpOnly()
+            .build()
+
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        client.newCall(request).execute().use { response ->
+            return response.code
+        }
+    }
 }
 

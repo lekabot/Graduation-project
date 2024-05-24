@@ -55,8 +55,12 @@ fun SearchPromptCreate(modifier: Modifier = Modifier) {
         }
     }
 
-    Scaffold {
-        Column(modifier = Modifier.fillMaxSize()) {
+    Scaffold { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             SearchBar(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,6 +103,7 @@ fun SearchPromptCreate(modifier: Modifier = Modifier) {
         }
     }
 }
+
 
 @Preview(
     showBackground = true,
