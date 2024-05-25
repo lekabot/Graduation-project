@@ -47,7 +47,7 @@ internal class AuthAPITest {
         every { response.code } returns 204
 
         val result = api.register("55", "55", "55")
-        assertEquals(AuthAPI.RegistrationResult.Success, result)
+        assertEquals(201, result)
 
     }
 
@@ -58,7 +58,7 @@ internal class AuthAPITest {
         every { response.code } returns 400
 
         val result = api.register("55", "55", "55")
-        assertEquals(AuthAPI.RegistrationResult.Error("Такой пользователь уже существует"), result)
+        assertEquals(400, result)
     }
 
     @Test

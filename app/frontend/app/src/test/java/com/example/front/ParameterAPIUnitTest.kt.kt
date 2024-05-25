@@ -1,7 +1,6 @@
 package com.example.front
 import com.example.front.data.AuthAPI
 import com.example.front.data.ParameterAPI
-import com.example.front.data.ThingAPI
 import io.mockk.every
 import io.mockk.mockk
 import okhttp3.OkHttpClient
@@ -14,7 +13,6 @@ import org.junit.runners.MethodSorters
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ParameterAPIUnitTest {
     private val paramAPI = ParameterAPI()
-    private val api = ThingAPI()
     private val authApi = AuthAPI()
     private val client = mockk<OkHttpClient>()
     private val response = mockk<Response>()

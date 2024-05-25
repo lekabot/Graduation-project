@@ -120,14 +120,10 @@ fun RegistrationScreen() {
                     CoroutineScope(Dispatchers.IO).launch {
                         val result = api.register(email, username, password)
                         withContext(Dispatchers.Main) {
-                            errorMessage = when (result) {
-                                is AuthAPI.RegistrationResult.Success -> {
-                                    "Регистрация прошла успешно"
-                                }
-
-                                is AuthAPI.RegistrationResult.Error -> {
-                                    result.message
-                                }
+                            errorMessage = if (result == 201) {
+                                "Регистрация прошла успешно"
+                            } else{
+                                "Пользователь с таким именем уже существует"
                             }
                         }
                     }

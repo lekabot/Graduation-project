@@ -9,9 +9,14 @@ object TokenManager {
     fun setToken(token: String?) {
         this.token = token
         token?.let {
-            File(TOKEN_FILE).writeText(it)
+            try {
+                File(TOKEN_FILE).writeText(it)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
+
 
     fun getToken(): String? {
         if (token == null) {

@@ -89,7 +89,9 @@ class MainActivity : ComponentActivity() {
             Button(
                 onClick = {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val loggedIn = api.login(username, password)
+                        val loggedIn = api.login(
+                            username=username,
+                            password=password)
                         withContext(Dispatchers.Main) {
                             if (loggedIn) {
                                 errorMessage = "Вы вошли"

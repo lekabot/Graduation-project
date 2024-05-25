@@ -1,20 +1,15 @@
 package com.example.front.data
 
+import com.example.front.data.Common.client
+import com.example.front.data.Common.host
 import com.google.gson.Gson
-import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.net.URLEncoder
 
-class ParameterAPI(private val host: String = "http://192.168.31.186:80") {
-    private val client = OkHttpClient.Builder()
-        .cookieJar(MyCookieJar())
-        .build()
-
+class ParameterAPI() {
     data class ParameterList(val status: String, val data: MutableList<Parameter>)
     data class Parameter(val id: Int, val key: String, val value: String)
 
@@ -22,7 +17,6 @@ class ParameterAPI(private val host: String = "http://192.168.31.186:80") {
     data class NewParameter(val key: String, val value: String)
 
     fun createParameter(thingTitle: String, key: String, value: String): Int {
-        val token = TokenManager.getToken() ?: throw IOException("Token not found")
         val requestUrl = "$host/parameter/parameter_create/$thingTitle"
 
         val json = """
@@ -34,55 +28,34 @@ class ParameterAPI(private val host: String = "http://192.168.31.186:80") {
 
         val requestBody = json.toRequestBody("application/json".toMediaType())
 
-        val request = Request.Builder()
-            .url(requestUrl)
-            .post(requestBody)
-            .build()
+        val request = Common.createRequest(requestUrl, "POST", requestBody)
 
-        val cookie = Cookie.Builder()
-            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
-            .path("/")
-            .name("bonds")
-            .value(token)
-            .httpOnly()
-            .build()
+        val cookie = Common.formCookie(requestUrl)
 
         client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
-            return response.code
-        }
+        val response = Common.executeRequest(request)
+        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+        return response.code
     }
 
     fun getParameters(thingTitle: String): ParameterList {
-        val token = TokenManager.getToken() ?: throw IOException("Token not found")
         val encodedTitle = URLEncoder.encode(thingTitle, "UTF-8")
         val requestUrl = "$host/parameter/get_parameters_by_thing_name/$encodedTitle"
 
-        val request = Request.Builder()
-            .url(requestUrl)
-            .build()
+        val request = Common.createRequest(requestUrl, "GET")
 
-        val cookie = Cookie.Builder()
-            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
-            .path("/")
-            .name("bonds")
-            .value(token)
-            .httpOnly()
-            .build()
+        val cookie = Common.formCookie(requestUrl)
 
         client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
-            val parameterList = Gson().fromJson(response.body!!.string(), ParameterList::class.java)
-            return parameterList
-        }
+        val response = Common.executeRequest(request)
+        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+        val parameterList = Gson().fromJson(response.body!!.string(), ParameterList::class.java)
+        return parameterList
     }
 
     fun deleteParameter(thingTitle: String, key: String, value: String): Int {
-        val token = TokenManager.getToken() ?: throw IOException("Token not found")
         val requestUrl = "$host/parameter/delete_parameter"
 
         val json = """
@@ -95,29 +68,18 @@ class ParameterAPI(private val host: String = "http://192.168.31.186:80") {
 
         val requestBody = json.toRequestBody("application/json".toMediaType())
 
-        val request = Request.Builder()
-            .url(requestUrl)
-            .delete(requestBody)
-            .build()
+        val request = Common.createRequest(requestUrl, "DELETE", requestBody)
 
-        val cookie = Cookie.Builder()
-            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
-            .path("/")
-            .name("bonds")
-            .value(token)
-            .httpOnly()
-            .build()
+        val cookie = Common.formCookie(requestUrl)
 
         client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
-            return response.code
-        }
+        val response = Common.executeRequest(request)
+        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+        return response.code
     }
 
     fun updateParameter(oldParameter: OldParameter, newParameter: NewParameter): Int {
-        val token = TokenManager.getToken() ?: throw IOException("Token not found")
         val requestUrl = "$host/parameter/update/"
 
         val json = """
@@ -136,24 +98,14 @@ class ParameterAPI(private val host: String = "http://192.168.31.186:80") {
 
         val requestBody = json.toRequestBody("application/json".toMediaType())
 
-        val request = Request.Builder()
-            .url(requestUrl)
-            .put(requestBody)
-            .build()
+        val request = Common.createRequest(requestUrl, "PUT", requestBody)
 
-        val cookie = Cookie.Builder()
-            .domain(requestUrl.toHttpUrlOrNull()?.host ?: throw IOException("Host not found"))
-            .path("/")
-            .name("bonds")
-            .value(token)
-            .httpOnly()
-            .build()
+        val cookie = Common.formCookie(requestUrl)
 
         client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw IOException("Unexpected code $response")
-            return response.code
-        }
+        val response = Common.executeRequest(request)
+        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+        return response.code
     }
 }
