@@ -30,7 +30,6 @@ internal class AuthAPITest {
         assertTrue(result)
     }
 
-
     @Test
     fun test2_login_failure() {
         every { client.newCall(any()).execute() } returns response

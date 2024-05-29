@@ -19,13 +19,13 @@ class ThingAPI() {
 
         client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
 
-        val response = Common.executeRequest(request)
+        val response =  Common.executeRequest(request)
         if (!response.isSuccessful) throw IOException("Unexpected code $response")
         val thingList = Gson().fromJson(response.body!!.string(), ThingList::class.java)
         return thingList
     }
 
-    fun getThing(title: String): ThingList {
+     fun getThing(title: String): ThingList {
         val requestUrl = "$host/thing/get_by_name/$title"
         val request = createRequest(requestUrl, "GET")
         val cookie = Common.formCookie(requestUrl)
