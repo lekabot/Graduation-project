@@ -1,5 +1,6 @@
 package com.example.front
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -22,18 +22,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.front.data.ApiHelper
+import com.example.front.data.AuthAPI
+import com.example.front.ui.theme.Errors.ErrorMessage
 import com.example.front.ui.theme.FrontTheme
+import com.example.front.ui.theme.UIObject.Link
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,8 +52,12 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun LoginScreen() {
-        var username by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
+        val api = AuthAPI()
+        val context = LocalContext.current
+//        var username by remember { mutableStateOf("") }
+//        var password by remember { mutableStateOf("") }
+        var username = "admin"
+        var password = "admin"
         var errorMessage by remember { mutableStateOf("") }
 
         Column(
@@ -82,15 +86,21 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val loggedIn = ApiHelper.login(username, password)
+                        val loggedIn = api.login(
+                            username=username,
+                            password=password)
                         withContext(Dispatchers.Main) {
-                            errorMessage = if (loggedIn) {
-                                "You are the best"
+                            if (loggedIn) {
+                                errorMessage = "Вы вошли"
+                                val intent = Intent(context, Finder::class.java)
+                                context.startActivity(intent)
                             } else {
-                                "Wrong login or password"
+                                errorMessage = "Неверный логин или пароль"
                             }
                         }
                     }
@@ -100,24 +110,11 @@ class MainActivity : ComponentActivity() {
             }
             Spacer(modifier = Modifier.height(16.dp))
             ErrorMessage(errorMessage)
-
+            Spacer(modifier = Modifier.height(16.dp))
+            Link(text = "Ешё нет аккаунта?", dest = Registration::class.java)
         }
     }
 
-    @Composable
-    fun ErrorMessage(text: String) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color.Transparent
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Red,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
 
     @Preview(
         showBackground = true,
