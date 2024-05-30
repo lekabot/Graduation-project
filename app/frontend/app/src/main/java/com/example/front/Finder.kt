@@ -115,8 +115,9 @@ fun ThingSquare(text: String, modifier: Modifier = Modifier, onDelete: (String) 
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .clickable {
-                            val intent = Intent(context, ThingParameters::class.java)
-                            intent.putExtra(text, text)
+                            val intent = Intent(context, ThingParameters::class.java).apply {
+                                putExtra("item_title", text)
+                            }
                             context.startActivity(intent)
                         }
                 )

@@ -6,6 +6,7 @@
     <string name="title_activity_qractivity">QRActivity</string>
     <string name="title_activity_finder">Finder</string>
     <string name="find_name">Поиск...</string>
-    <string name="title_activity_detail">DetailActivity</string>
+    <string name="title_activity_detail">ThingParameters</string>
+    <string name="title_activity_thing_parameters">ThingParameters</string>
 
 </resources>

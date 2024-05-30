@@ -15,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -92,10 +91,10 @@ fun RegistrationScreen() {
             label = { Text("Пароль") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.padding(bottom = 16.dp),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = passwordColor,
-                unfocusedBorderColor = passwordColor
-            )
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = passwordColor,
+//                unfocusedBorderColor = passwordColor
+//            )
         )
 
         OutlinedTextField(
@@ -104,10 +103,10 @@ fun RegistrationScreen() {
             label = { Text("Повторите пароль") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.padding(bottom = 16.dp),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = passwordColor,
-                unfocusedBorderColor = passwordColor
-            )
+//            colors = TextFieldDefaults.outlinedTextFieldColors(
+//                focusedBorderColor = passwordColor,
+//                unfocusedBorderColor = passwordColor
+//            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -17,9 +17,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".DetailActivity"
+            android:name=".ThingParameters"
             android:exported="false"
-            android:label="@string/title_activity_detail"
+            android:label="@string/title_activity_thing_parameters"
             android:theme="@style/Theme.Front" />
         <activity
             android:name=".Finder"
