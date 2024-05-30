@@ -50,8 +50,6 @@ async def get_parameters_by_thing_title_logic(
     parameters = result.scalars().all()
     if parameters:
         return [ParameterRead.from_orm(parameter).dict() for parameter in parameters]
-    else:
-        raise HTTPException(status_code=400, detail="No data found")
 
 
 async def parameter_create_logic(

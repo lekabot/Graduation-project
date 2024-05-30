@@ -27,8 +27,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,12 +60,7 @@ class Finder : ComponentActivity() {
 }
 
 @Composable
-fun ThingSquare(
-    text: String,
-    modifier: Modifier = Modifier,
-    onDelete: (String) -> Unit,
-    onUpdate: (String, String) -> Unit
-) {
+fun ThingSquare(text: String, modifier: Modifier = Modifier, onDelete: (String) -> Unit, onUpdate: (String, String) -> Unit) {
     var isEditing by remember { mutableStateOf(false) }
     var newText by remember { mutableStateOf(text) }
 
@@ -74,49 +69,55 @@ fun ThingSquare(
             .border(6.dp, Color(0xFF62519F), RoundedCornerShape(12.dp))
             .padding(10.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = { onDelete(text) }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_delete),
-                    contentDescription = "Delete"
-                )
-            }
-            if (isEditing) {
-                TextField(
-                    value = newText,
-                    onValueChange = { newText = it },
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
+        if (isEditing) {
+            BasicTextField(
+                value = newText,
+                onValueChange = { newText = it },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (newText.isNotEmpty()) {
                             onUpdate(text, newText)
                             isEditing = false
+                        } else {
+                            newText = text
+                            isEditing = false
                         }
+                    }
+                ),
+                singleLine = true,
+            )
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = { onDelete(text) }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_delete),
+                        contentDescription = "Delete"
                     )
-                )
-            } else {
+                }
                 Text(
                     text = text,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-            }
-            IconButton(onClick = { isEditing = true }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_edit),
-                    contentDescription = "Edit"
-                )
+                IconButton(onClick = { isEditing = true }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_edit),
+                        contentDescription = "Edit"
+                    )
+                }
             }
         }
     }
 }
-
 
 @Composable
 fun ShowAllThings(thingList: List<ThingAPI.Thing>, onDelete: (String) -> Unit, onUpdate: (String, String) -> Unit) {
@@ -140,7 +141,6 @@ fun ShowAllThings(thingList: List<ThingAPI.Thing>, onDelete: (String) -> Unit, o
         }
     }
 }
-
 
 @Composable
 fun AddButton(modifier: Modifier = Modifier, onAdd: (String) -> Unit) {
@@ -191,7 +191,19 @@ fun AddButton(modifier: Modifier = Modifier, onAdd: (String) -> Unit) {
 @Composable
 fun SearchPromptCreate(modifier: Modifier = Modifier) {
     var searchText by remember { mutableStateOf("") }
-    var thingList by remember { mutableStateOf(api.getAllThing().data) }
+    var thingList by remember { mutableStateOf(mutableListOf<ThingAPI.Thing>()) }
+
+    fun updateThingList() {
+        thingList = if (searchText.isEmpty()) {
+            api.getAllThing().data.toMutableList() ?: mutableListOf()
+        } else {
+            api.getThing(searchText).data.toMutableList() ?: mutableListOf()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        updateThingList()
+    }
 
     Scaffold { innerPadding ->
         Column(
@@ -206,18 +218,10 @@ fun SearchPromptCreate(modifier: Modifier = Modifier) {
                 query = searchText,
                 onQueryChange = { text ->
                     searchText = text
-                    thingList = if (text.isEmpty()) {
-                        api.getAllThing().data
-                    } else {
-                        api.getThing(text).data
-                    }
+                    updateThingList()
                 },
                 onSearch = {
-                    thingList = if (searchText.isEmpty()) {
-                        api.getAllThing().data
-                    } else {
-                        api.getThing(searchText).data
-                    }
+                    updateThingList()
                 },
                 active = false,
                 onActiveChange = {},
@@ -226,30 +230,18 @@ fun SearchPromptCreate(modifier: Modifier = Modifier) {
 
             AddButton(onAdd = { newText ->
                 api.addThing(newText)
-                thingList = if (searchText.isEmpty()) {
-                    api.getAllThing().data
-                } else {
-                    api.getThing(searchText).data
-                }
+                updateThingList()
             })
             Spacer(modifier = Modifier.height(10.dp))
             ShowAllThings(
                 thingList = thingList,
                 onDelete = { title ->
                     api.deleteThing(title)
-                    thingList = if (searchText.isEmpty()) {
-                        api.getAllThing().data
-                    } else {
-                        api.getThing(searchText).data
-                    }
+                    updateThingList()
                 },
                 onUpdate = { oldTitle, newTitle ->
                     api.updateThingName(oldTitle, newTitle)
-                    thingList = if (searchText.isEmpty()) {
-                        api.getAllThing().data
-                    } else {
-                        api.getThing(searchText).data
-                    }
+                    updateThingList()
                 }
             )
         }
