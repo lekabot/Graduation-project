@@ -40,14 +40,15 @@ class ParameterAPI() {
     }
 
     fun getParameters(thingTitle: String): ParameterList {
-        val encodedTitle = URLEncoder.encode(thingTitle, "UTF-8")
-        val requestUrl = "$host/parameter/get_parameters_by_thing_name/$encodedTitle"
+        val encodedTitle = URLEncoder.encode(thingTitle, "UTF-8").replace("+", "%20")
+        val requestUrl = "$host/parameter/get_parameters_by_thing_title/$encodedTitle"
 
         val request = Common.createRequest(requestUrl, "GET")
 
         val cookie = Common.formCookie(requestUrl)
 
-        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull()
+            ?: throw IOException("Host not found"), listOf(cookie))
 
         val response = Common.executeRequest(request)
         if (!response.isSuccessful) throw IOException("Unexpected code $response")

@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -16,6 +17,7 @@ import java.io.IOException
 
 object Common {
     const val host: String = "http://192.168.31.186:80"
+
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throw IOException("Handle exception: ${throwable.message}")
     }
@@ -35,18 +37,28 @@ object Common {
     }
 
     suspend fun asyncExecuteRequest(request: Request): Response {
-        return scope.async {
-            client.newCall(request).execute()
-        }.await()
+        return withContext(Dispatchers.IO + exceptionHandler) {
+            try {
+                client.newCall(request).execute()
+            } catch (e: Exception) {
+                println("Exception in asyncExecuteRequest: ${e.message}")
+                throw e
+            }
+        }
     }
 
     fun executeRequest(request: Request): Response {
-        val deferredResult = CoroutineScope(Dispatchers.IO).async {
+        val deferredResult = scope.async {
             asyncExecuteRequest(request)
         }
 
         return runBlocking {
-            deferredResult.await()
+            try {
+                deferredResult.await()
+            } catch (e: Exception) {
+                println("Exception in executeRequest: ${e.message}")
+                throw IOException("Error executing request", e)
+            }
         }
     }
 

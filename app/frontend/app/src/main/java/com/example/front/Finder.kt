@@ -69,7 +69,7 @@ fun ThingSquare(text: String, modifier: Modifier = Modifier, onDelete: (String) 
 
     Box(
         modifier = modifier
-            .border(6.dp, Color(0xFF62519F), RoundedCornerShape(12.dp))
+            .border(2.dp, Color(0xFF62519F), RoundedCornerShape(12.dp))
             .padding(10.dp)
     ) {
         if (isEditing) {
@@ -163,7 +163,7 @@ fun AddButton(modifier: Modifier = Modifier, onAdd: (String) -> Unit) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .border(6.dp, Color(0xFF62519F), RoundedCornerShape(12.dp))
+            .border(2.dp, Color(0xFF62519F), RoundedCornerShape(12.dp))
             .padding(10.dp)
             .height(60.dp)
             .width(200.dp)
