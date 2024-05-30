@@ -1,7 +1,7 @@
 from parameters.manager import get_thing_by_title
 from .manager import get_curr_user_group, add_thing_logic, delete_thing_logic
 from .schemas import ThingRead
-from sqlalchemy import select, delete, and_, update
+from sqlalchemy import select, and_, update, func, cast, String
 from fastapi import APIRouter, Depends, HTTPException
 from models import ThingORM, UserORM, UserGroupORM
 from database import get_async_session
@@ -28,7 +28,7 @@ async def get_by_name(
                 UserGroupORM
             ).where(
                 and_(
-                    ThingORM.title.like(f"%{thing_name}%"),
+                    func.lower(cast(ThingORM.title, String)).like(f"%{thing_name.lower()}%"),
                     UserGroupORM.user_id == user.id)
             )
             result = await session.execute(query)
@@ -36,9 +36,10 @@ async def get_by_name(
 
             if thing_orms:
                 result = [ThingRead.from_orm(thing_orm).dict() for thing_orm in thing_orms]
-                return JSONResponse(status_code=200, content={"status": "success", "data": result})
             else:
-                raise HTTPException(status_code=400, detail="No data found")
+                result = []
+
+            return JSONResponse(status_code=200, content={"status": "success", "data": result})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

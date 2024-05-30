@@ -1,5 +1,6 @@
 package com.example.front
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -36,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -74,8 +77,10 @@ fun ThingSquare(text: String, modifier: Modifier = Modifier, onDelete: (String) 
                 value = newText,
                 onValueChange = { newText = it },
                 modifier = Modifier
+                    .height(50.dp)
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .wrapContentSize(Alignment.Center),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
                 ),
@@ -83,16 +88,17 @@ fun ThingSquare(text: String, modifier: Modifier = Modifier, onDelete: (String) 
                     onDone = {
                         if (newText.isNotEmpty()) {
                             onUpdate(text, newText)
-                            isEditing = false
                         } else {
                             newText = text
-                            isEditing = false
                         }
+                        isEditing = false
                     }
                 ),
                 singleLine = true,
             )
         } else {
+            val context = LocalContext.current
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -106,7 +112,13 @@ fun ThingSquare(text: String, modifier: Modifier = Modifier, onDelete: (String) 
                 }
                 Text(
                     text = text,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .clickable {
+                            val intent = Intent(context, ThingParameters::class.java)
+                            intent.putExtra(text, text)
+                            context.startActivity(intent)
+                        }
                 )
                 IconButton(onClick = { isEditing = true }) {
                     Icon(
