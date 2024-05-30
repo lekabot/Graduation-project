@@ -1,7 +1,11 @@
+from http.client import HTTPException
+
 from database import get_async_session
-from models import UserORM, GroupORM, ThingORM, UserGroupORM
+from models import UserORM, GroupORM, ThingORM, UserGroupORM, ThingParameterORM
 from sqlalchemy import select, delete, and_
 
+from parameters.manager import get_thing_by_title, get_parameters_by_thing_title_logic, delete_parameter_logic
+from parameters.schemas import ParameterDelete
 from things.schemas import UserGroupRead
 
 
@@ -43,17 +47,26 @@ async def delete_thing_logic(
         title: str,
         session,
         user: UserORM):
-    query_thing_id = await session.execute(
-        select(ThingORM.id).where(ThingORM.title == title)
-    )
-    thing_id = query_thing_id.scalar()
+    thing = await get_thing_by_title(title, user)
     group_id = await get_curr_user_group(user)
 
     del_in_usr_group = delete(UserGroupORM).where(and_(
-        UserGroupORM.thing_id == thing_id,
+        UserGroupORM.thing_id == thing.id,
         UserGroupORM.group_id == group_id
     ))
-    res = delete(ThingORM).where(ThingORM.title == title)
+
+    parameters = await get_parameters_by_thing_title_logic(title, session, user)
+
+    if parameters is not None:
+        for parameter in parameters:
+            await delete_parameter_logic(
+                ParameterDelete(
+                    thing_title=title,
+                    key=parameter['key'],
+                    value=parameter['value']
+                ), session, user)
+
+    res = delete(ThingORM).where(ThingORM.id == thing.id)
 
     await session.execute(del_in_usr_group)
     await session.execute(res)

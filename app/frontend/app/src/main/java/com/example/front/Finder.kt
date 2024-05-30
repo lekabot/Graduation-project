@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,61 +59,88 @@ class Finder : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchPromptCreate(modifier: Modifier = Modifier) {
-    var searchText by remember { mutableStateOf("") }
-    var thingList by remember { mutableStateOf(api.getAllThing().data) }
+fun ThingSquare(
+    text: String,
+    modifier: Modifier = Modifier,
+    onDelete: (String) -> Unit,
+    onUpdate: (String, String) -> Unit
+) {
+    var isEditing by remember { mutableStateOf(false) }
+    var newText by remember { mutableStateOf(text) }
 
-    Scaffold { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+    Box(
+        modifier = modifier
+            .border(6.dp, Color(0xFF62519F), RoundedCornerShape(12.dp))
+            .padding(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            SearchBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                query = searchText,
-                onQueryChange = { text ->
-                    searchText = text
-                },
-                onSearch = {},
-                active = false,
-                onActiveChange = {},
-                placeholder = { Text(stringResource(R.string.find_name)) },
-            ) {}
-
-            AddButton(onAdd = { newText ->
-                api.addThing(newText)
-                // Обновляем список после добавления
-                thingList = api.getAllThing().data
-            })
-            Spacer(modifier = Modifier.height(10.dp))
-            ShowAllThings(
-                thingList = thingList,
-                onDelete = { title ->
-                    api.deleteThing(title)
-                    thingList = api.getAllThing().data
-                }
-            )
+            IconButton(onClick = { onDelete(text) }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_delete),
+                    contentDescription = "Delete"
+                )
+            }
+            if (isEditing) {
+                TextField(
+                    value = newText,
+                    onValueChange = { newText = it },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            onUpdate(text, newText)
+                            isEditing = false
+                        }
+                    )
+                )
+            } else {
+                Text(
+                    text = text,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+            IconButton(onClick = { isEditing = true }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_edit),
+                    contentDescription = "Edit"
+                )
+            }
         }
     }
 }
+
 
 @Composable
-fun ShowAllThings(thingList: List<ThingAPI.Thing>, onDelete: (String) -> Unit) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(thingList.size) { index ->
-            ThingSquare(
-                text = thingList[index].title,
-                onDelete = onDelete
-            )
-            Spacer(modifier = Modifier.height(10.dp))
+fun ShowAllThings(thingList: List<ThingAPI.Thing>, onDelete: (String) -> Unit, onUpdate: (String, String) -> Unit) {
+    if (thingList.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "No items found")
+        }
+    } else {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(thingList.size) { index ->
+                ThingSquare(
+                    text = thingList[index].title,
+                    onDelete = onDelete,
+                    onUpdate = onUpdate
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
         }
     }
 }
+
 
 @Composable
 fun AddButton(modifier: Modifier = Modifier, onAdd: (String) -> Unit) {
@@ -159,39 +187,74 @@ fun AddButton(modifier: Modifier = Modifier, onAdd: (String) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ThingSquare(text: String, modifier: Modifier = Modifier, onDelete: (String) -> Unit) {
-    Box(
-        modifier = modifier
-            .border(6.dp, Color(0xFF62519F), RoundedCornerShape(12.dp))
-            .padding(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+fun SearchPromptCreate(modifier: Modifier = Modifier) {
+    var searchText by remember { mutableStateOf("") }
+    var thingList by remember { mutableStateOf(api.getAllThing().data) }
+
+    Scaffold { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            IconButton(onClick = { onDelete(text) }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_delete),
-                    contentDescription = "Delete"
-                )
-            }
-            Text(
-                text = text,
-                modifier = Modifier.padding(horizontal = 16.dp)
+            SearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                query = searchText,
+                onQueryChange = { text ->
+                    searchText = text
+                    thingList = if (text.isEmpty()) {
+                        api.getAllThing().data
+                    } else {
+                        api.getThing(text).data
+                    }
+                },
+                onSearch = {
+                    thingList = if (searchText.isEmpty()) {
+                        api.getAllThing().data
+                    } else {
+                        api.getThing(searchText).data
+                    }
+                },
+                active = false,
+                onActiveChange = {},
+                placeholder = { Text(stringResource(R.string.find_name)) },
+            ) {}
+
+            AddButton(onAdd = { newText ->
+                api.addThing(newText)
+                thingList = if (searchText.isEmpty()) {
+                    api.getAllThing().data
+                } else {
+                    api.getThing(searchText).data
+                }
+            })
+            Spacer(modifier = Modifier.height(10.dp))
+            ShowAllThings(
+                thingList = thingList,
+                onDelete = { title ->
+                    api.deleteThing(title)
+                    thingList = if (searchText.isEmpty()) {
+                        api.getAllThing().data
+                    } else {
+                        api.getThing(searchText).data
+                    }
+                },
+                onUpdate = { oldTitle, newTitle ->
+                    api.updateThingName(oldTitle, newTitle)
+                    thingList = if (searchText.isEmpty()) {
+                        api.getAllThing().data
+                    } else {
+                        api.getThing(searchText).data
+                    }
+                }
             )
-            IconButton(onClick = { /* Handle edit action */ }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_edit),
-                    contentDescription = "Edit"
-                )
-            }
         }
     }
 }
-
-
 
 @Preview(
     showBackground = true,

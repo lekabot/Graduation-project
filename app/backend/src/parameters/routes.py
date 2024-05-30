@@ -32,7 +32,7 @@ async def parameter_create(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router_parameter.get("/get_parameters_by_thing_name/{thing_title}")
+@router_parameter.get("/get_parameters_by_thing_title/{thing_title}")
 async def parameters_get_by_thing_title(
         thing_title: str,
         session=Depends(get_async_session),
