@@ -1,12 +1,13 @@
-from fastapi import FastAPI, Request, Depends, Response, HTTPException
+from fastapi import FastAPI, Request, Depends, HTTPException
 from auth.base_config import fastapi_users, auth_backend, current_user
-from auth.manager import get_user_manager
-from auth.routes import router_user
+from auth.routes import user_router
 from auth.schemas import UserRead, UserCreate
 from models import UserORM
-from things.router import router_thing
-from parameters.routes import router_parameter
-from group.routes import router_group
+from parameters.qr_param import qr_router
+from parameters.docs import docs_router
+from things.router import thing_router
+from parameters.routes import parameter_router
+from group.routes import group_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -36,10 +37,12 @@ app.include_router(
     tags=["Auth"],
 )
 
-app.include_router(router_user)
-app.include_router(router_thing)
-app.include_router(router_parameter)
-app.include_router(router_group)
+app.include_router(user_router)
+app.include_router(thing_router)
+app.include_router(parameter_router)
+app.include_router(group_router)
+app.include_router(qr_router)
+app.include_router(docs_router)
 
 
 @app.get("/auth/jwt/token")

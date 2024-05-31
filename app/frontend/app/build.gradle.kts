@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("org.mockito:mockito-core:4.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

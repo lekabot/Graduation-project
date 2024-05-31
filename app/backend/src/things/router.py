@@ -8,7 +8,7 @@ from database import get_async_session
 from fastapi.responses import JSONResponse
 from auth.base_config import current_user
 
-router_thing = APIRouter(
+thing_router = APIRouter(
     prefix="/thing",
     tags=["Thing"],
 )
@@ -16,7 +16,7 @@ router_thing = APIRouter(
 
 # Робит
 # Для поиска
-@router_thing.get("/get_by_name/{thing_name}")
+@thing_router.get("/get_by_name/{thing_name}")
 async def get_by_name(
         thing_name: str,
         session=Depends(get_async_session),
@@ -44,7 +44,7 @@ async def get_by_name(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router_thing.post("/add_thing/{title}")
+@thing_router.post("/add_thing/{title}")
 async def add_thing(
         title: str,
         session=Depends(get_async_session),
@@ -61,7 +61,7 @@ async def add_thing(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router_thing.delete("/delete_thing_by_title/{title}")
+@thing_router.delete("/delete_thing_by_title/{title}")
 async def delete_thing(
         title: str,
         session=Depends(get_async_session),
@@ -78,7 +78,7 @@ async def delete_thing(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router_thing.get("/get_all_thing_for_user/")
+@thing_router.get("/get_all_thing_for_user/")
 async def get_all_thing_for_user(
         session=Depends(get_async_session),
         user: UserORM = Depends(current_user)
@@ -100,7 +100,7 @@ async def get_all_thing_for_user(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router_thing.put("/update_name/{thing_title}/{new_title}")
+@thing_router.put("/update_name/{thing_title}/{new_title}")
 async def update_title(
         thing_title: str,
         new_title: str,

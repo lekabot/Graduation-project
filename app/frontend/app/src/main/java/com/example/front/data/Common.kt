@@ -36,7 +36,7 @@ object Common {
             .build()
     }
 
-    suspend fun asyncExecuteRequest(request: Request): Response {
+    private suspend fun asyncExecuteRequest(request: Request): Response {
         return withContext(Dispatchers.IO + exceptionHandler) {
             try {
                 client.newCall(request).execute()

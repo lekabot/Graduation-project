@@ -2,19 +2,19 @@ from sqlalchemy import update
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from auth.base_config import current_user
-from models import ParameterORM, ThingParameterORM, UserORM
+from models import ParameterORM, UserORM
 from database import get_async_session
 from .manager import get_thing_by_title, get_parameter, get_parameters_by_thing_title_logic, parameter_create_logic, \
     delete_parameter_logic
 from .schemas import ParameterUpdate, ParameterCreate, ParameterDelete, ParameterAuthoriz
 
-router_parameter = APIRouter(
+parameter_router = APIRouter(
     prefix="/parameter",
     tags=["Parameter"],
 )
 
 
-@router_parameter.post("/parameter_create/{thing_title}")
+@parameter_router.post("/parameter_create/{thing_title}")
 async def parameter_create(
         thing_title: str,
         parameter: ParameterCreate,
@@ -32,7 +32,7 @@ async def parameter_create(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router_parameter.get("/get_parameters_by_thing_title/{thing_title}")
+@parameter_router.get("/get_parameters_by_thing_title/{thing_title}")
 async def parameters_get_by_thing_title(
         thing_title: str,
         session=Depends(get_async_session),
@@ -49,7 +49,7 @@ async def parameters_get_by_thing_title(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router_parameter.delete("/delete_parameter")
+@parameter_router.delete("/delete_parameter")
 async def delete_parameter(
         par_del: ParameterDelete,
         session=Depends(get_async_session),
@@ -67,7 +67,7 @@ async def delete_parameter(
 
 
 # Робит
-@router_parameter.put("/update/")
+@parameter_router.put("/update/")
 async def parameter_update(
         old_param: ParameterAuthoriz,
         new_parameter: ParameterUpdate,
@@ -91,3 +91,4 @@ async def parameter_update(
             return JSONResponse(status_code=200, content={"status": "success"})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

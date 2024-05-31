@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class ParameterRead(BaseModel):
@@ -26,6 +27,10 @@ class ParameterCreate(BaseModel):
     key: str
     value: str
 
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
 
 class ParameterDelete(BaseModel):
     thing_title: str
@@ -40,3 +45,4 @@ class ParameterThingRead(BaseModel):
     class Config:
         orm_mode = True
         from_attributes = True
+
