@@ -1,5 +1,8 @@
 package com.example.front.data
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import com.example.front.param_api
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +16,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
+import okhttp3.ResponseBody
 import java.io.IOException
+import java.nio.file.Path
+import java.nio.file.Paths
 
 object Common {
     const val host: String = "http://192.168.31.186:80"
@@ -74,5 +80,24 @@ object Common {
             .build()
 
         return cookie
+    }
+
+    fun stringToPath(str: String): Path {
+        return Paths.get(str)
+    }
+
+    fun fileExists(path: String): Boolean {
+        return param_api.getFile(stringToPath(path)) != null
+    }
+
+    fun convertToImage(responseBody: ResponseBody): Bitmap? {
+        val bytes = responseBody.bytes()
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }
+
+    fun convertToBitmap(responseBody: ResponseBody?): Bitmap? {
+        return responseBody?.byteStream()?.use { inputStream ->
+            BitmapFactory.decodeStream(inputStream)
+        }
     }
 }

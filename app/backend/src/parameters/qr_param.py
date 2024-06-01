@@ -10,6 +10,8 @@ from database import get_async_session
 from models import UserORM
 from .manager import get_parameters_by_thing_title_logic, parameter_create_logic
 from .schemas import ParameterCreate
+import urllib.parse
+
 
 qr_router = APIRouter(
     prefix="/qr",
@@ -57,6 +59,34 @@ async def create_qr_code(
     )
 
     return {"message": "QR code generated successfully", "file_path": str(file_path)}
+
+
+# @qr_router.get("/get_file/{file_path:path}")
+# async def get_file(file_path: str):
+#     decoded_path = urllib.parse.unquote(file_path)
+#     print(decoded_path)
+#     full_path = Path(__file__).parent / decoded_path
+#
+#     if not full_path.exists() or not full_path.is_file():
+#         raise HTTPException(status_code=404, detail="File not found")
+#
+#     return FileResponse(path=full_path, filename=full_path.name)
+
+
+@qr_router.get("/get_file/{file_path:path}")
+async def get_file(file_path: str):
+    # Декодирование пути для обработки специальных символов
+    decoded_path = urllib.parse.unquote(file_path)
+
+    # Создание объекта Path с декодированным путем
+    file = Path(decoded_path)
+
+    # Проверка существования файла и что это не директория
+    if not file.exists() or not file.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # Возврат файла с использованием декодированного пути
+    return FileResponse(path=decoded_path, filename=file.name)
 
 
 @qr_router.get("/get_qr_code/{thing_title}")

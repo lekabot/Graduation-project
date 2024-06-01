@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,10 +41,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.example.front.data.Common.convertToBitmap
+import com.example.front.data.Common.fileExists
+import com.example.front.data.Common.stringToPath
 import com.example.front.data.ParameterAPI
 import com.example.front.ui.theme.FrontTheme
 
@@ -95,7 +100,7 @@ fun ParameterSquare(
                 onValueChange = { newText = it },
                 modifier = Modifier
                     .height(50.dp)
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .wrapContentSize(Alignment.Center),
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -117,26 +122,55 @@ fun ParameterSquare(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { onDelete(parameter) }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = "Delete"
-                    )
-                }
-                Text(
-                    text = "${parameter.key}: ${parameter.value}",
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                IconButton(onClick = { isEditing = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_edit),
-                        contentDescription = "Edit"
-                    )
+                when (parameter.key) {
+                    "document", "image", "qr" -> {
+                        if (fileExists(parameter.value)) {
+                            if (parameter.key == "image" || parameter.key == "qr") {
+                                val file = param_api.getFile(stringToPath(parameter.value))
+                                file?.let {
+                                    val imageBitmap = convertToBitmap(it)?.asImageBitmap()
+                                    imageBitmap?.let { bitmap ->
+                                        Box(modifier = Modifier.fillMaxWidth()) {
+                                            Image(
+                                                bitmap = bitmap,
+                                                contentDescription = null,
+                                                modifier = Modifier.align(Alignment.Center)
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    text = parameter.value,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                            }
+                        }
+                    }
+                    else -> {
+                        IconButton(onClick = { onDelete(parameter) }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_delete),
+                                contentDescription = "Delete"
+                            )
+                        }
+                        Text(
+                            text = "${parameter.key}: ${parameter.value}",
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        IconButton(onClick = { isEditing = true }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_edit),
+                                contentDescription = "Edit"
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun AddParameterButton(

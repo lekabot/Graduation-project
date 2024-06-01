@@ -6,8 +6,10 @@ import com.google.gson.Gson
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import java.io.IOException
 import java.net.URLEncoder
+import java.nio.file.Path
 
 class ParameterAPI() {
     data class ParameterList(val status: String, val data: MutableList<Parameter>)
@@ -108,5 +110,23 @@ class ParameterAPI() {
         val response = Common.executeRequest(request)
         if (!response.isSuccessful) throw IOException("Unexpected code $response")
         return response.code
+    }
+
+    fun getFile(path: Path): ResponseBody? {
+        val requestUrl = "$host/qr/get_file/$path"
+
+        val request = Common.createRequest(requestUrl, "GET")
+
+        val cookie = Common.formCookie(requestUrl)
+
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        val response = Common.executeRequest(request)
+
+        if (!response.isSuccessful || response.body == null) {
+            return null
+        }
+
+        return response.body
     }
 }
