@@ -1,13 +1,22 @@
 package com.example.front.data
 
+import android.graphics.Bitmap
 import com.example.front.data.Common.client
 import com.example.front.data.Common.host
 import com.google.gson.Gson
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
+import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 import java.net.URLEncoder
+import java.nio.file.Path
 
 class ParameterAPI() {
     data class ParameterList(val status: String, val data: MutableList<Parameter>)
@@ -109,4 +118,87 @@ class ParameterAPI() {
         if (!response.isSuccessful) throw IOException("Unexpected code $response")
         return response.code
     }
+
+    fun getFile(path: Path): ResponseBody? {
+        val requestUrl = "$host/file/get_file/$path"
+
+        val request = Common.createRequest(requestUrl, "GET")
+
+        val cookie = Common.formCookie(requestUrl)
+
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        val response = Common.executeRequest(request)
+
+        if (!response.isSuccessful || response.body == null) {
+            return null
+        }
+
+        return response.body
+    }
+
+    fun postDocument(file: File, thingTitle: String): Int {
+        val requestUrl = "$host/documents/upload_document/$thingTitle"
+
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("document", file.name, file.asRequestBody("application/pdf".toMediaTypeOrNull()))
+            .build()
+
+        val request = Common.createRequest(requestUrl, "POST", requestBody)
+
+        val cookie = Common.formCookie(requestUrl)
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        val response = Common.executeRequest(request)
+        return if (!response.isSuccessful) {
+            0
+        } else {
+            response.code
+        }
+    }
+
+    fun postImg(image: Bitmap, thingTitle: String, fileName: String): Int {
+        val requestUrl = "$host/file/upload_file/$thingTitle"
+
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        image.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val imageBytes = byteArrayOutputStream.toByteArray()
+
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("img", fileName, imageBytes.toRequestBody("image/png".toMediaType()))
+            .build()
+
+        val request = Common.createRequest(requestUrl, "POST", requestBody)
+
+        val cookie = Common.formCookie(requestUrl)
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        val response = Common.executeRequest(request)
+        return if (!response.isSuccessful) {
+            0
+        } else {
+            response.code
+        }
+    }
+
+
+    fun genQR(thingTitle: String): Int {
+        val requestUrl = "$host/qr/create_qr_code/$thingTitle"
+
+        val request = Common.createRequest(requestUrl, "POST", RequestBody.create(null, ByteArray(0)))
+        val cookie = Common.formCookie(requestUrl)
+
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        val response = Common.executeRequest(request)
+
+        return if (!response.isSuccessful || response.body == null) {
+            0
+        } else {
+            response.code
+        }
+    }
+
 }

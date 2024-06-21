@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from fastapi_users.db import SQLAlchemyBaseUserTable
 from database import Base
@@ -76,3 +76,15 @@ class UserGroupORM(Base):
     user = relationship("UserORM", back_populates="user_groups")
     group = relationship("GroupORM", back_populates="user_groups")
     thing = relationship("ThingORM", back_populates="user_groups")
+
+
+# class NotificationORM(Base):
+#     __tablename__ = "notification"
+#
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     user_id: Mapped[int] = mapped_column(ForeignKey('user.id'), nullable=False)
+#     thing_id: Mapped[int] = mapped_column(ForeignKey('thing.id'), nullable=False)
+#     datetime: Mapped[DateTime] = mapped_column(nullable=False)
+#
+#     user = relationship("UserORM", back_populates="notifications")
+#     thing = relationship("ThingORM", back_populates="notifications")

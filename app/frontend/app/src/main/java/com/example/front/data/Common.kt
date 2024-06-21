@@ -1,5 +1,6 @@
 package com.example.front.data
 
+import com.example.front.param_api
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,9 +15,11 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
+import java.nio.file.Path
+import java.nio.file.Paths
 
 object Common {
-    const val host: String = "http://192.168.31.186:80"
+    const val host: String = "http://192.168.235.86:80"
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throw IOException("Handle exception: ${throwable.message}")
@@ -30,13 +33,18 @@ object Common {
 
 
     fun createRequest(url: String, method: String, body: RequestBody? = null): Request {
-        return Request.Builder()
-            .url(url)
-            .method(method, body)
-            .build()
+        try {
+            return Request.Builder()
+                .url(url)
+                .method(method, body)
+                .build()
+        } catch (e: Exception) {
+            println("Exception in createRequest: ${e.message}")
+            throw e
+        }
     }
 
-    suspend fun asyncExecuteRequest(request: Request): Response {
+    private suspend fun asyncExecuteRequest(request: Request): Response {
         return withContext(Dispatchers.IO + exceptionHandler) {
             try {
                 client.newCall(request).execute()
@@ -74,5 +82,13 @@ object Common {
             .build()
 
         return cookie
+    }
+
+    fun stringToPath(str: String): Path {
+        return Paths.get(str)
+    }
+
+    fun fileExists(path: String): Boolean {
+        return param_api.getFile(stringToPath(path)) != null
     }
 }

@@ -21,18 +21,20 @@ async def init_db(
         el_macho = await create_user(email="no_name@example.com", username="el_macho", password="91269asft8")
         admin = await create_user(email="admin", username="admin", password="admin")
 
-        thing_titles = ["Книга", "Стол", "Компьютер", "Телефон", "Часы", "Картина", "Стул", "Лампа", "Кошелек", "Ключи"]
+        thing_titles = ["Калибраторы температуры КТ-1",
+                        "Вольтметр амплитудный ВА-3.1",
+                        "Термостат Термотест-300",
+                        "Портативный pH-метр МАРК-903",
+                        "Криостат Термотест-100",
+                        "Измеритель-калибратор "
+                        "сопротивлений прецизионный ИКС-1"]
         parameters = [
-            ParameterCreate(key="Автор", value="Джон Доу"),
-            ParameterCreate(key="Материал", value="Дерево"),
-            ParameterCreate(key="Производитель", value="Apple"),
-            ParameterCreate(key="Модель", value="iPhone 12"),
-            ParameterCreate(key="Бренд", value="Rolex"),
-            ParameterCreate(key="Художник", value="Ван Гог"),
-            ParameterCreate(key="Цвет", value="Красный"),
-            ParameterCreate(key="Стиль", value="Современный"),
-            ParameterCreate(key="Валюта", value="USD"),
-            ParameterCreate(key="Тип", value="Домашний"),
+            ParameterCreate(key="image", value="static/image/admin/1.jpg"),
+            ParameterCreate(key="image", value="static/image/admin/2.jpg"),
+            ParameterCreate(key="image", value="static/image/admin/3.jpg"),
+            ParameterCreate(key="image", value="static/image/admin/4.jpg"),
+            ParameterCreate(key="image", value="static/image/admin/5.jpg"),
+            ParameterCreate(key="image", value="static/image/admin/6.jpg"),
         ]
         for title, parameter in zip(thing_titles, parameters):
             await add_thing_logic(title, session, admin)

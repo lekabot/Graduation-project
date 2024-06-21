@@ -54,10 +54,10 @@ class MainActivity : ComponentActivity() {
     fun LoginScreen() {
         val api = AuthAPI()
         val context = LocalContext.current
-//        var username by remember { mutableStateOf("") }
-//        var password by remember { mutableStateOf("") }
-        var username = "admin"
-        var password = "admin"
+        var username by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+//        var username = "admin"
+//        var password = "admin"
         var errorMessage by remember { mutableStateOf("") }
 
         Column(

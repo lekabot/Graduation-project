@@ -42,18 +42,49 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.front.data.ThingAPI
 import com.example.front.ui.theme.FrontTheme
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
 val api = ThingAPI()
 
 class Finder : ComponentActivity() {
+    private lateinit var shakeDetector: ShakeDetector
+    private val registerForActivityResult = registerForActivityResult(ScanContract()) {result ->
+
+        if (result.contents != null) {
+            val intent = Intent(this, ThingParameters::class.java)
+            intent.putExtra("item_title", result.contents)
+            startActivity(intent)
+        }
+    }
+
+    private fun scan() {
+        val options = ScanOptions()
+        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+        options.setPrompt("Scan a QR code")
+        options.setCameraId(0)
+        options.setBeepEnabled(false)
+        options.setBarcodeImageEnabled(true)
+        registerForActivityResult.launch(options)
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        shakeDetector = ShakeDetector(this) {
+            runOnUiThread {
+//                android.widget.Toast.makeText(this, "Phone shaken!", android.widget.Toast.LENGTH_SHORT).show()
+                scan()
+            }
+        }
+
         setContent {
             FrontTheme {
                 SearchPromptCreate()
@@ -113,13 +144,16 @@ fun ThingSquare(text: String, modifier: Modifier = Modifier, onDelete: (String) 
                 Text(
                     text = text,
                     modifier = Modifier
+                        .weight(1f)
                         .padding(horizontal = 16.dp)
                         .clickable {
                             val intent = Intent(context, ThingParameters::class.java).apply {
                                 putExtra("item_title", text)
                             }
                             context.startActivity(intent)
-                        }
+                        },
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 )
                 IconButton(onClick = { isEditing = true }) {
                     Icon(

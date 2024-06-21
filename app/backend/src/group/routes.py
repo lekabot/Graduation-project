@@ -1,31 +1,31 @@
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from fastapi import APIRouter, Depends
-from models import GroupORM, UserORM
+from models import GroupORM
 from database import get_async_session
 from .schemas import UserEmptyGroupCreate, UserGroupRead
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from .manager import create_group, delete_user_groups
 
-router_group = APIRouter(
+group_router = APIRouter(
     prefix="/group",
     tags=["Group"],
 )
 
 
-@router_group.post("/create_empty")
+@group_router.post("/create_empty")
 async def create_empty_endpoint(
         user: UserEmptyGroupCreate):
     return await create_group(user)
 
 
-@router_group.delete("/delete_by_username/{username}")
+@group_router.delete("/delete_by_username/{username}")
 async def delete_by_username(
         username: str):
     return await delete_user_groups(username)
 
 
-@router_group.get("/get_group_by_user_id/{owner_id}")
+@group_router.get("/get_group_by_user_id/{owner_id}")
 async def get_group_by_user_id(
         owner_id: int,
         session=Depends(get_async_session)):
