@@ -14,8 +14,6 @@ thing_router = APIRouter(
 )
 
 
-# Робит
-# Для поиска
 @thing_router.get("/get_by_name/{thing_name}")
 async def get_by_name(
         thing_name: str,

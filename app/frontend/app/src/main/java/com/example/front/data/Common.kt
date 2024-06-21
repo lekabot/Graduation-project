@@ -1,7 +1,5 @@
 package com.example.front.data
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import com.example.front.param_api
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -16,13 +14,12 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
-import okhttp3.ResponseBody
 import java.io.IOException
 import java.nio.file.Path
 import java.nio.file.Paths
 
 object Common {
-    const val host: String = "http://192.168.31.186:80"
+    const val host: String = "http://192.168.235.86:80"
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throw IOException("Handle exception: ${throwable.message}")
@@ -36,10 +33,15 @@ object Common {
 
 
     fun createRequest(url: String, method: String, body: RequestBody? = null): Request {
-        return Request.Builder()
-            .url(url)
-            .method(method, body)
-            .build()
+        try {
+            return Request.Builder()
+                .url(url)
+                .method(method, body)
+                .build()
+        } catch (e: Exception) {
+            println("Exception in createRequest: ${e.message}")
+            throw e
+        }
     }
 
     private suspend fun asyncExecuteRequest(request: Request): Response {
@@ -88,16 +90,5 @@ object Common {
 
     fun fileExists(path: String): Boolean {
         return param_api.getFile(stringToPath(path)) != null
-    }
-
-    fun convertToImage(responseBody: ResponseBody): Bitmap? {
-        val bytes = responseBody.bytes()
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-    }
-
-    fun convertToBitmap(responseBody: ResponseBody?): Bitmap? {
-        return responseBody?.byteStream()?.use { inputStream ->
-            BitmapFactory.decodeStream(inputStream)
-        }
     }
 }

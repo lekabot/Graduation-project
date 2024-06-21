@@ -8,5 +8,6 @@
     <string name="find_name">Поиск...</string>
     <string name="title_activity_detail">ThingParameters</string>
     <string name="title_activity_thing_parameters">ThingParameters</string>
+    <string name="title_activity_no_con_to_serv">NoConToServ</string>
 
 </resources>

@@ -12,18 +12,21 @@
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
-
-
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Front"
         android:usesCleartextTraffic="true"
-        android:hardwareAccelerated="true"
         tools:targetApi="31">
+        <activity
+            android:name=".NoConToServ"
+            android:exported="false"
+            android:label="@string/title_activity_no_con_to_serv"
+            android:theme="@style/Theme.Front" />
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
@@ -53,6 +56,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

@@ -1,3 +1,5 @@
+import os.path
+
 from database import get_async_session
 from models import UserORM, ThingORM, UserGroupORM, ParameterORM, ThingParameterORM
 from fastapi import HTTPException
@@ -111,6 +113,9 @@ async def delete_parameter_logic(
         )
     )
     del_param = delete(ParameterORM).where(ParameterORM.id == parameter.id)
+
+    if par_del.key in ["document", "qr", "image"] and os.path.exists(par_del.value):
+        os.remove(par_del.value)
 
     await session.execute(del_thing_param)
     await session.execute(del_param)

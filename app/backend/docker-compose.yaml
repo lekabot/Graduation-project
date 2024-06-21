@@ -48,3 +48,9 @@ services:
       - db
     links:
       - app
+
+#  redis:
+#    image: redis:latest
+#    container_name: redis_app
+#    ports:
+#      - "6379:6379"

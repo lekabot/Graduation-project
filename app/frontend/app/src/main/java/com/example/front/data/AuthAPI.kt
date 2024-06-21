@@ -60,6 +60,16 @@ class AuthAPI() {
         return response.code
     }
 
+    fun checkServCon(): Int {
+        val requestUrl = "$host/auth/jwt/token"
+        val request = createRequest(requestUrl, "GET")
+        val cookie = formCookie(requestUrl)
+
+        client.cookieJar.saveFromResponse(requestUrl.toHttpUrlOrNull() ?: throw IOException("Host not found"), listOf(cookie))
+
+        val response = executeRequest(request)
+        return response.code
+    }
 
     fun register(
         email: String,

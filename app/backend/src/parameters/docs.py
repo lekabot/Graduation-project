@@ -21,6 +21,24 @@ class DocumentNotFound(HTTPException):
         super().__init__(status_code=404, detail="Document not found")
 
 
+@docs_router.get("/get_document/{thing_title}")
+async def get_document(
+        thing_title: str,
+        user: UserORM = Depends(current_user),
+        session: AsyncSession = Depends(get_async_session)
+):
+    parameters = await get_parameters_by_thing_title_logic(thing_title, session, user)
+    document_parameter = next((param for param in parameters if param['key'] == 'document'), None)
+    if not document_parameter:
+        raise DocumentNotFound()
+
+    document_path = Path(document_parameter['value'])
+    if not document_path.exists():
+        raise DocumentNotFound()
+
+    return FileResponse(path=document_path, media_type='application/octet-stream', filename=document_path.name)
+
+
 @docs_router.post("/upload_document/{thing_title}")
 async def upload_document(
         thing_title: str,
@@ -44,21 +62,3 @@ async def upload_document(
     )
 
     return {"message": "Document uploaded successfully", "file_path": str(document_path)}
-
-
-@docs_router.get("/get_document/{thing_title}")
-async def get_document(
-        thing_title: str,
-        user: UserORM = Depends(current_user),
-        session: AsyncSession = Depends(get_async_session)
-):
-    parameters = await get_parameters_by_thing_title_logic(thing_title, session, user)
-    document_parameter = next((param for param in parameters if param['key'] == 'document'), None)
-    if not document_parameter:
-        raise DocumentNotFound()
-
-    document_path = Path(document_parameter['value'])
-    if not document_path.exists():
-        raise DocumentNotFound()
-
-    return FileResponse(path=document_path, media_type='application/octet-stream', filename=document_path.name)
